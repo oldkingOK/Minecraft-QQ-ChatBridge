@@ -1,0 +1,47 @@
+{
+    "Servers":
+    {
+        "Test":
+        {
+            "Server": {
+                "Host": "127.0.0.1:25565"
+            },
+            "Config": {
+                "Logging": {
+                    "DebugMessages": false
+                },
+                "ChatBot":
+                {
+                    "AutoRelog": 
+                    {
+                        "Enabled": true,
+                        "Delay": { "min": 3.0, "max": 3.0 },
+                        "Retries": -1,
+                        "Ignore_Kick_Message": true
+                    },
+                    "WebSocketBot":
+                    {
+                        "Enabled": true,
+                        "Ip": "127.0.0.1",
+                        "Port": 8043,
+                        "Password": "12345678"
+                    }
+                }
+            }
+        }
+    },
+
+    "Accounts":
+    {
+        "QQbot":
+        {
+            "Account":
+            {
+                "Login": "QQbot",
+                "Password": "11111111"
+            },
+            "AccountType": "yggdrasil",
+            "AuthServer": {"Host": "littleskin.cn", "Port": 443}
+        }
+    }
+}
