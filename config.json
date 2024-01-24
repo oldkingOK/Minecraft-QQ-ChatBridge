@@ -3,9 +3,9 @@
     {
         "Test":
         {
-            "Server": {
-                "Host": "127.0.0.1:25565"
-            },
+            "Enabled": true,
+            "Account": "QQbot",
+            "Host": "127.0.0.1:22065",
             "Config": {
                 "Logging": {
                     "DebugMessages": false
