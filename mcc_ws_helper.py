@@ -12,6 +12,8 @@ server_websocket_dict = {}
 """存放 <server_name, websocket> 键值对"""
 DEBUG_MODE = True
 DEATH_MESSAGE_FILE = "./asset/death_msg.json"
+DEATH_MESSAGE_DICT: dict[str,str] = {}
+"""存放死亡消息的dict，用于翻译死亡消息"""
 DEATH_MESSAGE_PATTERNS = []
 """存放死亡消息的正则表达式，用于判断死亡消息"""
 RETRY_TIME = 3
@@ -133,6 +135,8 @@ def handle_mcc_json(account_name:str, mcc_json) -> str | None:
             """判断成就信息的正则表达式"""
             pattern_goal = r'^([a-zA-Z0-9_]+) has reached the goal.*'
             """判断进度信息的正则表达式"""
+            pattern_death = r'^(\[death\.[a-zA-Z\.]+\]).*'
+            """如果未翻译出来，那么就形如 [death.attack.genericKill.player] oldkingOK Zombie"""
             if re.fullmatch(pattern_player_chat, text):
                 if not text.startswith(f"<{account_name}> ") and not text.startswith(f"* {account_name} "):
                     result = text
@@ -146,17 +150,23 @@ def handle_mcc_json(account_name:str, mcc_json) -> str | None:
                     result = f"<喜报> {text}"
                     message_type = MessageType.ACHIEVEMENT
             elif is_death_msg(text):
-                """
-                大多数死亡原因能够正常显示，
-                由于mcc/MinecraftClient/Resources/en_us.json中未包含对应的翻译（未更新）
-                导致显示
-                [death.attack.genericKill.player] oldkingOK Zombie
-                TODO 解决方案，未检测出的信息从en_us.json获取
-                TODO 向mcc提交pull request
-                """
                 if not text.startswith(f"{account_name} "):
                     result = f"<悲报> {text}"
                     message_type = MessageType.DEATH
+
+            elif re.fullmatch(pattern_death, text):
+                """
+                大多数死亡原因能够正常显示，
+                由于mcc未获取到对应的翻译，导致显示
+                [death.attack.genericKill.player] oldkingOK Zombie
+                未检测出的信息从en_us.json获取
+                建议向mcc提交pull request
+                """
+                msg = death_msg_translate(text)
+                if not text.startswith(f"{account_name} "):
+                    result = f"<悲报> {msg}"
+                    message_type = MessageType.DEATH
+
             else:
                 result = text
                 message_type = MessageType.UNKNOWN
@@ -187,9 +197,9 @@ def build_regex_pattern(pattern_str):
     return re.compile(pattern_str)
 
 def load_death_msg():
-    death_msg_dict = json.load(open(DEATH_MESSAGE_FILE, 'r'))
-    global DEATH_MESSAGE_PATTERNS
-    DEATH_MESSAGE_PATTERNS = [build_regex_pattern(msg) for msg in list(death_msg_dict.values())]
+    global DEATH_MESSAGE_DICT, DEATH_MESSAGE_PATTERNS
+    DEATH_MESSAGE_DICT = json.load(open(DEATH_MESSAGE_FILE, 'r'))
+    DEATH_MESSAGE_PATTERNS = [build_regex_pattern(msg) for msg in list(DEATH_MESSAGE_DICT.values())]
 
 def is_death_msg(msg) -> bool:
     """判断是否是死亡消息"""
@@ -203,11 +213,30 @@ def is_death_msg(msg) -> bool:
         
     return False
 
+def death_msg_translate(text: str) -> str:
+    """
+    翻译死亡消息，翻译失败就返回原文
+    
+    [death.attack.genericKill.player] oldkingOK Zombie
+    %1$s was killed whilst fighting %2$s
+    """
+    msg = ""
+    splited = text.split(" ")
+    translate_key = splited[0][1:][:-1]
+    if translate_key in DEATH_MESSAGE_DICT:
+        msg = DEATH_MESSAGE_DICT[translate_key]
+    else: return text
+
+    for index in range(1, len(splited)):
+        msg = msg.replace(f"%{index}$s", splited[index])
+
+    return msg
+
 # "oldkingOK was killed whilst fighting Fish"
 def test_death():
-    print(handle_mcc_json(
+    print(handle_mcc_json("QQbot",
         {
             "event":"OnChatRaw",
-            "data":"{\"text\":\"oldkingOK was slain by Zombie\"}"
+            "data":"{\"text\":\"[death.attack.genericKill.player] oldkingOK Zombie\"}"
         }
     ))
