@@ -134,7 +134,7 @@ def handle_mcc_json(account_name:str, mcc_json) -> str | None:
             pattern_goal = r'^([a-zA-Z0-9_]+) has reached the goal.*'
             """判断进度信息的正则表达式"""
             if re.fullmatch(pattern_player_chat, text):
-                if not text.startswith(f"<{account_name}> "):
+                if not text.startswith(f"<{account_name}> ") and not text.startswith(f"* {account_name} "):
                     result = text
                     message_type = MessageType.CHAT
                 else: 

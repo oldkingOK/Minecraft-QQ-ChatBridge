@@ -24,7 +24,7 @@ def send_msg_to_other_mccs(server_name: str, msg: str):
         if server_name not in server_list: continue
         for server in server_list:
             if server == server_name: continue
-            send_msg(server, msg)
+            send_msg(server, f"/me {msg}")
             
             
     
