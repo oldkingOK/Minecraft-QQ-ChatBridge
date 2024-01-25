@@ -7,6 +7,7 @@ from enum import Enum, auto
 import json
 import re
 import time
+import ok_logger
 
 server_websocket_dict = {}
 """存放 <server_name, websocket> 键值对"""
@@ -60,7 +61,7 @@ def connect_and_auth(server_name: str, address: str, password: str) -> bool:
             websocket = connect(address)
             success = True
         except BaseException as exception:
-            print(f"Server <{server_name}> Catch exception: {exception}, retry after {RETRY_TIME} seconds...")
+            ok_logger.get_logger().info(f"Server <{server_name}> Catch exception: {exception}, retry after {RETRY_TIME} seconds...")
             time.sleep(RETRY_TIME)
             continue
 
@@ -77,10 +78,10 @@ def connect_and_auth(server_name: str, address: str, password: str) -> bool:
     websocket.send(json.dumps(data))
     recv_message_json = json.loads(websocket.recv())
     if not json.loads(recv_message_json["data"])["success"]: 
-        print(f"连接 {server_name} 失败")
+        ok_logger.get_logger().info(f"连接 {server_name} 失败")
         return False
         
-    print(f"连接 {server_name} 成功！")
+    ok_logger.get_logger().info(f"连接 {server_name} 成功！")
     # 存储
     server_websocket_dict[server_name] = websocket
     return True
@@ -100,11 +101,11 @@ def start_recv(server_name: str, account_name:str, msg_handler: Callable[[str, s
             message = remove_color_char(websocket.recv())
             handle_result, message_type = handle_mcc_json(account_name, mcc_json=json.loads(message))
             if handle_result is not None: 
-                if DEBUG_MODE: print(f"{server_name} received: [{handle_result}], which type is {message_type.name}")
+                ok_logger.get_logger().debug(f"{server_name} received: [{handle_result}], which type is {message_type.name}")
                 msg_handler(server_name, handle_result, message_type)
     
     except BaseException as exception:
-        print(f"Server {server_name} Catch exception: {exception}, Exit")
+        ok_logger.get_logger().info(f"Server {server_name} Catch exception: {exception}, Exit")
 
 
 def handle_mcc_json(account_name:str, mcc_json) -> str | None:
@@ -183,10 +184,10 @@ def handle_mcc_json(account_name:str, mcc_json) -> str | None:
             result = None
             message_type = MessageType.UNKNOWN
     
-    if DEBUG_MODE and message_type != MessageType.UNKNOWN: 
+    if message_type != MessageType.UNKNOWN: 
         # 过滤掉UNKNOWN消息避免刷屏
-        print(f"The handle_mcc_json type is: {message_type.name}, result is: {result}")
-        print(f"The origin mcc_json is: {json.dumps(mcc_json)}")
+        ok_logger.get_logger().debug(f"The handle_mcc_json type is: {message_type.name}, result is: {result}")
+        ok_logger.get_logger().debug(f"The origin mcc_json is: {json.dumps(mcc_json)}")
 
     return result, message_type
 
@@ -234,7 +235,7 @@ def death_msg_translate(text: str) -> str:
 
 # "oldkingOK was killed whilst fighting Fish"
 def test_death():
-    print(handle_mcc_json("QQbot",
+    ok_logger.get_logger().info(handle_mcc_json("QQbot",
         {
             "event":"OnChatRaw",
             "data":"{\"text\":\"[death.attack.genericKill.player] oldkingOK Zombie\"}"

@@ -1,4 +1,5 @@
 import libtmux
+import ok_logger
 
 """
 用群号定位window（如group-11223344），每当要attach session的时候，从source window里面
@@ -14,7 +15,7 @@ server_pane_dict = {}
 
 def init_tmux():
     init_source_session()
-    print("Tmux init successful.")
+    ok_logger.get_logger().info("Tmux init successful.")
 
 def init_source_session():
     tmux_server = libtmux.Server()

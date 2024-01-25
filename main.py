@@ -4,6 +4,7 @@ from mcc_ws_helper import start_ws, MessageType
 import mcc_config_helper
 import mcc_client_helper
 import mcc_message_helpler
+import ok_logger
 from to_qq_helper import init_to_qq_helper, send_to_qqgroup
 from tmux_helper import init_tmux, attach_mcc
 import threading
@@ -53,9 +54,11 @@ def main():
     try:
         while True:
             input("Press enter to attach, and <Ctrl-b> <d> to detach\n")
+            ok_logger.pause()
             attach_mcc()
+            ok_logger.start()
     except KeyboardInterrupt:
-        print("KeyboardInterrupt, Exit...")
+        ok_logger.get_logger().info("KeyboardInterrupt, Exit...")
         mcc_client_helper.stop_mccs(mcc_config_helper.get_server_list(CONFIG_PATH))
 
 
