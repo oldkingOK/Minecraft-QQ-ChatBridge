@@ -28,6 +28,34 @@
                     }
                 }
             }
+        },
+        "1.20server":
+        {
+            "Enabled": true,
+            "Account": "acc2",
+            "Host": "127.0.0.1:25565",
+            "Config": {
+                "Logging": {
+                    "DebugMessages": false
+                },
+                "ChatBot":
+                {
+                    "AutoRelog": 
+                    {
+                        "Enabled": true,
+                        "Delay": { "min": 3.0, "max": 3.0 },
+                        "Retries": -1,
+                        "Ignore_Kick_Message": true
+                    },
+                    "WebSocketBot":
+                    {
+                        "Enabled": true,
+                        "Ip": "127.0.0.1",
+                        "Port": 8044,
+                        "Password": "12345678"
+                    }
+                }
+            }
         }
     },
 
@@ -42,6 +70,16 @@
             },
             "AccountType": "yggdrasil",
             "AuthServer": {"Host": "littleskin.cn", "Port": 443}
+        },
+        "acc2":
+        {
+            "Account":
+            {
+                "Login": "QQbot",
+                "Password": "11122222"
+            },
+            "AccountType": "yggdrasil",
+            "AuthServer": {"Host": "web.com", "Port": 443}
         }
     }
 }
