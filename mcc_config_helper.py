@@ -31,15 +31,18 @@ def load_config(config_json_name: str, mcc_ini_template: str, tmp_folder: str):
         with open(f"{tmp_folder}/{server_name}.ini", "w") as output_file:
             toml.dump(mcc_config_template_json, output_file)
 
-def get_server_dict(config_json_name: str) -> dict:
+def get_server_list(config_json_name: str) -> list:
+    """
+    获取配置文件中Enabled的服务器名列表
+    """
     with open(config_json_name, 'r') as config_json_file:
         config_json = json.load(config_json_file)
 
-    result = {}
+    result = []
     servers = config_json["Servers"]
     for server_name in servers:
         server = servers[server_name]
-        result[server_name] = server["Enabled"]
+        if server["Enabled"]: result.append(server_name)
 
     return result
 
@@ -75,6 +78,12 @@ def get_global_setting(config_json_name: str, key: str) -> any:
     with open(config_json_name, 'r') as config_json_file:
         config_json = json.load(config_json_file)
     return config_json["Settings"][key]
+
+def get_account(config_json_name: str, server_name: str) -> str:
+    with open(config_json_name, 'r') as config_json_file:
+        config_json = json.load(config_json_file)
+    account_name = config_json["Servers"][server_name]["Account"]
+    return config_json["Accounts"][account_name]["Account"]["Login"]
 
 # def main():
 #     load_config("config.json", "mcc_config_template.ini", "./tmp")

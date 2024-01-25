@@ -28,6 +28,9 @@ def start_mcc(server_name: str, passwd: str | None):
 def stop_mccs(server_list: list):
     for server_name in server_list: send_cmd(server_name, "/quit")
 
+def send_msg(server_name: str, msg: str):
+    """向服务器发消息"""
+    send_cmd(server_name, msg)
 # def main():
 #     init_mcc_starter("config.json", "mcc_config_template.ini", "./tmp", "/home/oldkingok/Minecraft-QQ-ChatBridge/Minecraft-Console-Client/MinecraftClient/bin/Release/net7.0/linux-arm64/publish/MinecraftClient")
     

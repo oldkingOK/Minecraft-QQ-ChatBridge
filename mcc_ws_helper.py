@@ -22,10 +22,12 @@ class MessageType(Enum):
     SYSTEM = auto()
     DEATH = auto()
     CHAT = auto()
+    SENT = auto()
+    """已发送的消息，比如<QQbot> Test"""
     ACHIEVEMENT = auto()
     DISCONNECT = auto()
 
-def start_ws(server_name, ip, port, passwd, msg_handler: Callable[[str, str, MessageType], None]):
+def start_ws(server_name, account_name, ip, port, passwd, msg_handler: Callable[[str, str, MessageType], None]):
     """
     与mcc连接，验证并接受消息
 
@@ -34,7 +36,7 @@ def start_ws(server_name, ip, port, passwd, msg_handler: Callable[[str, str, Mes
     消息接受回调函数：fun(server_name:str, msg:str, message_type: MessageType) -> None
     """
     if connect_and_auth(server_name, f"ws://{ip}:{str(port)}", passwd):
-        start_recv(server_name, msg_handler)
+        start_recv(server_name,account_name, msg_handler)
 
 def connect_and_auth(server_name: str, address: str, password: str) -> bool:
     """
@@ -81,7 +83,7 @@ def connect_and_auth(server_name: str, address: str, password: str) -> bool:
     server_websocket_dict[server_name] = websocket
     return True
 
-def start_recv(server_name: str, msg_handler: Callable[[str, str, MessageType], None]):
+def start_recv(server_name: str, account_name:str, msg_handler: Callable[[str, str, MessageType], None]):
     """
     开始循环接受mcc websocket发来的消息
 
@@ -94,7 +96,7 @@ def start_recv(server_name: str, msg_handler: Callable[[str, str, MessageType], 
     try:
         while True:
             message = remove_color_char(websocket.recv())
-            handle_result, message_type = handle_mcc_json(mcc_json=json.loads(message))
+            handle_result, message_type = handle_mcc_json(account_name, mcc_json=json.loads(message))
             if handle_result is not None: 
                 if DEBUG_MODE: print(f"{server_name} received: [{handle_result}], which type is {message_type.name}")
                 msg_handler(server_name, handle_result, message_type)
@@ -103,7 +105,7 @@ def start_recv(server_name: str, msg_handler: Callable[[str, str, MessageType], 
         print(f"Server {server_name} Catch exception: {exception}, Exit")
 
 
-def handle_mcc_json(mcc_json) -> str | None:
+def handle_mcc_json(account_name:str, mcc_json) -> str | None:
     """
     处理mcc发进来的消息
     如果返回None，就是其他消息
@@ -132,22 +134,29 @@ def handle_mcc_json(mcc_json) -> str | None:
             pattern_goal = r'^([a-zA-Z0-9_]+) has reached the goal.*'
             """判断进度信息的正则表达式"""
             if re.fullmatch(pattern_player_chat, text):
-                result = text
-                message_type = MessageType.CHAT
+                if not text.startswith(f"<{account_name}> "):
+                    result = text
+                    message_type = MessageType.CHAT
+                else: 
+                    result = None
+                    message_type = MessageType.SENT
             elif re.fullmatch(pattern_achievement, text) or re.fullmatch(pattern_goal, text):
                 # ok_bot has made the advancement §a[§aDiamonds!]
-                result = f"<喜报> {text}"
-                message_type = MessageType.ACHIEVEMENT
+                if not text.startswith(f"{account_name} "):
+                    result = f"<喜报> {text}"
+                    message_type = MessageType.ACHIEVEMENT
             elif is_death_msg(text):
                 """
                 大多数死亡原因能够正常显示，
                 由于mcc/MinecraftClient/Resources/en_us.json中未包含对应的翻译（未更新）
                 导致显示
                 [death.attack.genericKill.player] oldkingOK Zombie
+                TODO 解决方案，未检测出的信息从en_us.json获取
                 TODO 向mcc提交pull request
                 """
-                result = f"<悲报> {text}"
-                message_type = MessageType.DEATH
+                if not text.startswith(f"{account_name} "):
+                    result = f"<悲报> {text}"
+                    message_type = MessageType.DEATH
             else:
                 result = text
                 message_type = MessageType.UNKNOWN
