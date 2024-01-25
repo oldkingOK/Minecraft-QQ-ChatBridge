@@ -14,7 +14,7 @@ server_pane_dict = {}
 
 def init_tmux():
     init_source_session()
-    print("Init!")
+    print("Tmux init successful.")
 
 def init_source_session():
     tmux_server = libtmux.Server()
@@ -44,5 +44,7 @@ def attach_mcc():
     """
     附加到mcc上 使用 <ctrl-d> 返回
     """
-    global source_session
+    global source_session, source_window
+    # 水平方向平均分割
+    source_window.select_layout("even-horizontal")
     source_session.attach_session()
