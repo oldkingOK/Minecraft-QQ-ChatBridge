@@ -12,7 +12,7 @@ server_websocket_dict = {}
 """存放 <server_name, websocket> 键值对"""
 DEBUG_MODE = True
 DEATH_MESSAGE_FILE = "./asset/death_msg.json"
-DEATH_MESSAGE_PATTERNS = {}
+DEATH_MESSAGE_PATTERNS = []
 """存放死亡消息的正则表达式，用于判断死亡消息"""
 RETRY_TIME = 3
 """WebSocket重连尝试间隔（秒）"""
@@ -25,10 +25,16 @@ class MessageType(Enum):
     ACHIEVEMENT = auto()
     DISCONNECT = auto()
 
-def start_ws(server_name, ip, port, passwd):
-    """传入参数，连接，验证并接受消息"""
+def start_ws(server_name, ip, port, passwd, msg_handler: Callable[[str, str, MessageType], None]):
+    """
+    与mcc连接，验证并接受消息
+
+    服务器名
+
+    消息接受回调函数：fun(server_name:str, msg:str, message_type: MessageType) -> None
+    """
     if connect_and_auth(server_name, f"ws://{ip}:{str(port)}", passwd):
-        start_recv(server_name, print)
+        start_recv(server_name, msg_handler)
 
 def connect_and_auth(server_name: str, address: str, password: str) -> bool:
     """
@@ -75,17 +81,23 @@ def connect_and_auth(server_name: str, address: str, password: str) -> bool:
     server_websocket_dict[server_name] = websocket
     return True
 
-def start_recv(server_name: str, msg_handler: Callable[[str], None]):
-    """开始循环接受mcc websocket发来的消息"""
+def start_recv(server_name: str, msg_handler: Callable[[str, str, MessageType], None]):
+    """
+    开始循环接受mcc websocket发来的消息
+
+    服务器名
+
+    消息接受回调函数：fun(server_name:str, msg:str, message_type: MessageType) -> None
+    """
     global server_websocket_dict
     websocket = server_websocket_dict[server_name]
     try:
         while True:
-            message = websocket.recv()
-            handle_result = handle_mcc_json(mcc_json=json.loads(message))
+            message = remove_color_char(websocket.recv())
+            handle_result, message_type = handle_mcc_json(mcc_json=json.loads(message))
             if handle_result is not None: 
-                if DEBUG_MODE: print(f"{server_name} received: {handle_result}")
-                msg_handler(handle_result)
+                if DEBUG_MODE: print(f"{server_name} received: [{handle_result}], which type is {message_type.name}")
+                msg_handler(server_name, handle_result, message_type)
     
     except BaseException as exception:
         print(f"Server {server_name} Catch exception: {exception}, Exit")
@@ -115,14 +127,16 @@ def handle_mcc_json(mcc_json) -> str | None:
 
             pattern_player_chat = r'^<([a-zA-Z0-9_]+)> (.+)$'
             """判断玩家聊天的正则表达式"""
-            pattern_achievement = r'.*has made the advancement.*'
+            pattern_achievement = r'^([a-zA-Z0-9_]+) has made the advancement.*'
             """判断成就信息的正则表达式"""
+            pattern_goal = r'^([a-zA-Z0-9_]+) has reached the goal.*'
+            """判断进度信息的正则表达式"""
             if re.fullmatch(pattern_player_chat, text):
                 result = text
                 message_type = MessageType.CHAT
-            elif re.fullmatch(pattern_achievement, text):
+            elif re.fullmatch(pattern_achievement, text) or re.fullmatch(pattern_goal, text):
                 # ok_bot has made the advancement §a[§aDiamonds!]
-                result = f"<喜报> {remove_color_char(text)}"
+                result = f"<喜报> {text}"
                 message_type = MessageType.ACHIEVEMENT
             elif is_death_msg(text):
                 """
@@ -136,6 +150,7 @@ def handle_mcc_json(mcc_json) -> str | None:
                 message_type = MessageType.DEATH
             else:
                 result = text
+                message_type = MessageType.UNKNOWN
 
         case "OnDisconnect":
             result = None
@@ -154,7 +169,7 @@ def handle_mcc_json(mcc_json) -> str | None:
         print(f"The handle_mcc_json type is: {message_type.name}, result is: {result}")
         print(f"The origin mcc_json is: {json.dumps(mcc_json)}")
 
-    return result
+    return result, message_type
 
 def build_regex_pattern(pattern_str):
     # 将 %1$s, %2$s, %3$s 替换为玩家名
@@ -184,6 +199,6 @@ def test_death():
     print(handle_mcc_json(
         {
             "event":"OnChatRaw",
-            "data":"{\"text\":\"oldkingOK was killed whilst fighting Fish\"}"
+            "data":"{\"text\":\"oldkingOK was slain by Zombie\"}"
         }
     ))

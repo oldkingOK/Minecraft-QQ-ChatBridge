@@ -63,6 +63,18 @@ def get_server_config_dict(config_json_name: str) -> dict:
 
     return result
 
+def get_group_servers_dict(config_json_name: str) -> dict:
+    """<群号, 服务器列表> 的dict"""
+    with open(config_json_name, 'r') as config_json_file:
+        config_json = json.load(config_json_file)
+
+    return config_json["Groups"]
+
+def get_global_setting(config_json_name: str, key: str) -> any:
+    """获取全局设置，即根节点“Settings”中内容"""
+    with open(config_json_name, 'r') as config_json_file:
+        config_json = json.load(config_json_file)
+    return config_json["Settings"][key]
 
 # def main():
 #     load_config("config.json", "mcc_config_template.ini", "./tmp")

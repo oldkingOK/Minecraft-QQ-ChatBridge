@@ -1,4 +1,18 @@
 {
+    "Settings":
+    {
+        "ONEBOT_HTTP": "http://127.0.0.1:5700"
+    },
+
+    "Groups":
+    {
+        "1123334567":
+        [
+            "Test",
+            "1.20server"
+        ]
+    },
+
     "Servers":
     {
         "Test":

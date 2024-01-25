@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from mcc_ws_helper import start_ws
-from mcc_config_helper import load_config, get_server_dict, get_server_config_dict
+from mcc_ws_helper import start_ws, MessageType
+from mcc_config_helper import load_config, get_server_dict, get_server_config_dict, get_group_servers_dict, get_global_setting
 from mcc_client_helper import init_mcc_starter, start_mcc, stop_mccs
+from qq_helper import init_qq_helper, send_to_qqgroup
 from tmux_helper import init_tmux, attach_mcc
 import threading
 
@@ -13,6 +14,12 @@ def main():
     load_config(CONFIG_PATH, "mcc_config_template.ini", "./tmp")
     init_mcc_starter("./tmp", MCC_PATH)
     init_tmux()
+    
+    # 初始化qqbot_helper
+    init_qq_helper(get_group_servers_dict(CONFIG_PATH), get_global_setting(CONFIG_PATH, "ONEBOT_HTTP"))
+    def msg_handler(server_name:str, msg:str, message_type: MessageType) -> None:
+        if message_type != MessageType.UNKNOWN:
+            send_to_qqgroup(server_name, msg)
 
     # 启动mcc
     server_dict = get_server_dict(CONFIG_PATH)
@@ -29,14 +36,14 @@ def main():
         port = ws_config["Port"]
         passwd = ws_config["Password"]
         
-        functions.append(lambda s=server_name, i=ip, p=port, pw=passwd: start_ws(s, i, p, pw))
+        functions.append(lambda s=server_name, i=ip, p=port, pw=passwd, mh=msg_handler: start_ws(s, i, p, pw, mh))
         
     # 创建线程并运行
     threads = [threading.Thread(target=func) for func in functions]
 
     for thread in threads:
         thread.start()
-    
+
     # 死循环，接受用户输入
     try:
         while True:
