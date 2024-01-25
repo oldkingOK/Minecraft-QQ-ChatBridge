@@ -6,7 +6,7 @@ MCC_PATH = ""
 """MCC程序的路径"""
 PASSWD = "12345678"
 
-def init_mcc_starter(tmp_folder: str, mcc_path: str):
+def init(tmp_folder: str, mcc_path: str):
     global TMP_FOLDER, MCC_PATH
     TMP_FOLDER = tmp_folder
     MCC_PATH = mcc_path

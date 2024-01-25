@@ -3,7 +3,7 @@ from mcc_client_helper import send_msg
 GROUP_SERVER_DICT = {}
 """群号-服务器名列表，用于发送消息到同组其他服务器"""
 
-def init_mcc_message(group_server_dict: dict):
+def init(group_server_dict: dict):
     """
     用来向mcc发送消息
     
