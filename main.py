@@ -5,13 +5,14 @@ from mcc_start_helper import init_mcc_starter, start_mcc
 from tmux_helper import init_tmux, attach_mcc
 
 MCC_PATH = "/home/oldkingok/Minecraft-QQ-ChatBridge/Minecraft-Console-Client/MinecraftClient/bin/Release/net7.0/linux-arm64/publish/MinecraftClient"
+CONFIG_PATH = "./asset/config.json"
 
 def main():
-    load_config("config.json", "mcc_config_template.ini", "./tmp")
+    load_config(CONFIG_PATH, "mcc_config_template.ini", "./tmp")
     init_mcc_starter("./tmp", MCC_PATH)
     init_tmux()
 
-    server_dict = get_server_dict("config.json")
+    server_dict = get_server_dict(CONFIG_PATH)
     for server_name, enabled in server_dict.items():
         if enabled: start_mcc(server_name=server_name, passwd="12345678")
     
