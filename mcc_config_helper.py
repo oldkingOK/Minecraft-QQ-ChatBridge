@@ -43,6 +43,27 @@ def get_server_dict(config_json_name: str) -> dict:
 
     return result
 
+def get_server_config_dict(config_json_name: str) -> dict:
+    """
+    <server_name, config_dict>
+    
+    自动排除未启用的服务器
+
+    其中config_dict详细请看config.json的 Servers.server_name.Config
+    """
+    with open(config_json_name, 'r') as config_json_file:
+        config_json = json.load(config_json_file)
+
+    result = {}
+    servers = config_json["Servers"]
+    for server_name in servers:
+        server = servers[server_name]
+        if not server["Enabled"]: continue
+        result[server_name] = server["Config"]
+
+    return result
+
+
 # def main():
 #     load_config("config.json", "mcc_config_template.ini", "./tmp")
 

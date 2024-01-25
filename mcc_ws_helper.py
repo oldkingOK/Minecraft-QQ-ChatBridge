@@ -1,42 +1,83 @@
 from websockets.sync.client import connect
+from websockets import ConnectionClosed, ConnectionClosedError
+
 from text_util import remove_color_char
 from typing import Callable
+from enum import Enum, auto
 import json
 import re
 
-websocket = None
+server_websocket_dict = {}
+"""存放 <server_name, websocket> 键值对"""
 DEBUG_MODE = True
 DEATH_MESSAGE_FILE = "./asset/death_msg.json"
 DEATH_MESSAGE_PATTERNS = {}
 """存放死亡消息的正则表达式，用于判断死亡消息"""
 
-def connect_and_auth(address: str, password: str):
+class MessageType(Enum):
+    UNKNOWN = auto()
+    SYSTEM = auto()
+    DEATH = auto()
+    CHAT = auto()
+    ACHIEVEMENT = auto()
+    DISCONNECT = auto()
+
+def start_ws(server_name, ip, port, passwd):
+    """传入参数，连接，验证并接受消息"""
+    if connect_and_auth(server_name, f"ws://{ip}:{str(port)}", passwd):
+        start_recv(server_name, print)
+
+def connect_and_auth(server_name: str, address: str, password: str) -> bool:
     """
+    连接并验证
+    server_name 服务器名
+
     address "ws://127.0.0.1:8043"
+
     password "12345678"
-    see https://mccteam.github.io/guide/websocket/
+
+    返回是否成功
+
+    见 https://mccteam.github.io/guide/websocket/
     """
-    global websocket
+    global server_websocket_dict
     websocket = connect(address)
     data = {
         "command": "Authenticate",
         "requestId": "0",
         "parameters": [password]
     }
+    """
+    {"event": "OnWsCommandResponse",
+      "data": "{\"success\": true, \"requestId\": \"0\", \"command\": \"Authenticate\",
+        \"result\": \"Successfully authenticated!\"}"}
+    """
     websocket.send(json.dumps(data))
-    message = websocket.recv()
-    if DEBUG_MODE: print(f"Received: {message}")
+    recv_message_json = json.loads(websocket.recv())
+    if not json.loads(recv_message_json["data"])["success"]: 
+        print(f"连接 {server_name} 失败")
+        return False
+        
+    print(f"连接 {server_name} 成功！")
+    # 存储
+    server_websocket_dict[server_name] = websocket
+    return True
 
-def start_recv(msg_handler: Callable[[str], None]):
-    global websocket
+def start_recv(server_name: str, msg_handler: Callable[[str], None]):
+    """开始循环接受mcc websocket发来的消息"""
+    global server_websocket_dict
+    websocket = server_websocket_dict[server_name]
     try:
         while True:
             message = websocket.recv()
             handle_result = handle_mcc_json(mcc_json=json.loads(message))
-            msg_handler(handle_result)
+            if handle_result is not None: 
+                if DEBUG_MODE: print(f"{server_name} received: {handle_result}")
+                msg_handler(handle_result)
     
-    except KeyboardInterrupt:
-        print("Exit")
+    except BaseException as exception:
+        print(f"Catch {exception}, {server_name} Exit")
+
 
 def handle_mcc_json(mcc_json) -> str | None:
     """
@@ -45,10 +86,9 @@ def handle_mcc_json(mcc_json) -> str | None:
     如果返回Str，就是要发到QQ的消息
     """
     result = None
+    message_type = MessageType.UNKNOWN
     
     match mcc_json["event"]:
-        case "OnTimeUpdate" | "OnLatencyUpdate" | "OnServerTpsUpdate":
-            result = None
         case "OnChatRaw":
             """
             "text":"<oldkingOK> hi"
@@ -67,9 +107,11 @@ def handle_mcc_json(mcc_json) -> str | None:
             """判断成就信息的正则表达式"""
             if re.fullmatch(pattern_player_chat, text):
                 result = text
+                message_type = MessageType.CHAT
             elif re.fullmatch(pattern_achievement, text):
                 # ok_bot has made the advancement §a[§aDiamonds!]
                 result = f"<喜报> {remove_color_char(text)}"
+                message_type = MessageType.ACHIEVEMENT
             elif is_death_msg(text):
                 """
                 大多数死亡原因能够正常显示，
@@ -79,15 +121,25 @@ def handle_mcc_json(mcc_json) -> str | None:
                 TODO 向mcc提交pull request
                 """
                 result = f"<悲报> {text}"
+                message_type = MessageType.DEATH
             else:
                 result = text
 
-        case "OnDisconnect" | _:
-            if DEBUG_MODE: print(f"The origin mcc_json is: {json.dumps(mcc_json)}")
-            return None
+        case "OnDisconnect":
+            result = None
+            message_type = MessageType.DISCONNECT
+
+        case "OnWsCommandResponse":
+            result = None
+            message_type = MessageType.SYSTEM
+        
+        case _:
+            result = None
+            message_type = MessageType.UNKNOWN
     
-    if DEBUG_MODE: 
-        print(f"The handle_mcc_json result is: {result}")
+    if DEBUG_MODE and message_type != MessageType.UNKNOWN: 
+        # 过滤掉UNKNOWN消息避免刷屏
+        print(f"The handle_mcc_json type is: {message_type.name}, result is: {result}")
         print(f"The origin mcc_json is: {json.dumps(mcc_json)}")
 
     return result
