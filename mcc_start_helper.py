@@ -9,28 +9,28 @@ MCC_PATH = ""
 """MCC程序的路径"""
 PASSWD = "12345678"
 
-def init(config_json_name: str, mcc_ini_template: str, tmp_folder: str, mcc_path: str):
+def init_mcc_starter(tmp_folder: str, mcc_path: str):
     global TMP_FOLDER, MCC_PATH
     TMP_FOLDER = tmp_folder
     MCC_PATH = mcc_path
-    load_config(config_json_name, mcc_ini_template, tmp_folder)
 
-def start_mcc(server_name: str):
+def start_mcc(server_name: str, passwd: str | None):
     """
     运行一个mcc
+    如果passwd为None，就不使用sudo
     """
-    cmd = f"sudo -E {MCC_PATH} {TMP_FOLDER}/{server_name}.ini"
+    if passwd is not None:
+        cmd = "sudo -E "
+    else: cmd = ""
+
+    cmd += f"{MCC_PATH} {TMP_FOLDER}/{server_name}.ini"
     add_mcc_pane(server_name)
     send_cmd(server_name, cmd)
-    send_cmd(server_name, PASSWD)
-    attach_mcc()
+    if passwd is not None: send_cmd(server_name, PASSWD)
 
-    print("hi")
+# def main():
+#     init_mcc_starter("config.json", "mcc_config_template.ini", "./tmp", "/home/oldkingok/Minecraft-QQ-ChatBridge/Minecraft-Console-Client/MinecraftClient/bin/Release/net7.0/linux-arm64/publish/MinecraftClient")
+    
+#     start_mcc("Test")
 
-def main():
-    init("config.json", "mcc_config_template.ini", "./tmp", "/home/oldkingok/Minecraft-QQ-ChatBridge/Minecraft-Console-Client/MinecraftClient/bin/Release/net7.0/linux-arm64/publish/MinecraftClient")
-    init_tmux()
-
-    start_mcc("Test")
-
-main()
+# main()
