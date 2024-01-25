@@ -2,7 +2,7 @@
 
 from mcc_ws_helper import start_ws
 from mcc_config_helper import load_config, get_server_dict, get_server_config_dict
-from mcc_start_helper import init_mcc_starter, start_mcc, stop_mccs
+from mcc_client_helper import init_mcc_starter, start_mcc, stop_mccs
 from tmux_helper import init_tmux, attach_mcc
 import threading
 
