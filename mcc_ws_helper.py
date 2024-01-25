@@ -6,6 +6,7 @@ from typing import Callable
 from enum import Enum, auto
 import json
 import re
+import time
 
 server_websocket_dict = {}
 """存放 <server_name, websocket> 键值对"""
@@ -13,6 +14,8 @@ DEBUG_MODE = True
 DEATH_MESSAGE_FILE = "./asset/death_msg.json"
 DEATH_MESSAGE_PATTERNS = {}
 """存放死亡消息的正则表达式，用于判断死亡消息"""
+RETRY_TIME = 3
+"""WebSocket重连尝试间隔（秒）"""
 
 class MessageType(Enum):
     UNKNOWN = auto()
@@ -41,7 +44,16 @@ def connect_and_auth(server_name: str, address: str, password: str) -> bool:
     见 https://mccteam.github.io/guide/websocket/
     """
     global server_websocket_dict
-    websocket = connect(address)
+    success = False
+    while not success:
+        try:
+            websocket = connect(address)
+            success = True
+        except BaseException as exception:
+            print(f"Server <{server_name}> Catch exception: {exception}, retry after {RETRY_TIME} seconds...")
+            time.sleep(RETRY_TIME)
+            continue
+
     data = {
         "command": "Authenticate",
         "requestId": "0",
@@ -76,7 +88,7 @@ def start_recv(server_name: str, msg_handler: Callable[[str], None]):
                 msg_handler(handle_result)
     
     except BaseException as exception:
-        print(f"Catch {exception}, {server_name} Exit")
+        print(f"Server {server_name} Catch exception: {exception}, Exit")
 
 
 def handle_mcc_json(mcc_json) -> str | None:
