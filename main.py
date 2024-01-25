@@ -4,7 +4,7 @@ from mcc_ws_helper import start_ws, MessageType
 from mcc_config_helper import load_config, get_server_list, get_server_config_dict, get_group_servers_dict, get_global_setting, get_account
 from mcc_client_helper import init_mcc_starter, start_mcc, stop_mccs
 from mcc_message_helpler import init_mcc_message, send_msg_to_other_mccs
-from qq_helper import init_qq_helper, send_to_qqgroup
+from to_qq_helper import init_to_qq_helper, send_to_qqgroup
 from tmux_helper import init_tmux, attach_mcc
 import threading
 
@@ -17,7 +17,7 @@ def main():
     init_tmux()
     
     # 初始化qqbot_helper, mcc_message_helper，用于发送qq消息和发送服务器消息
-    init_qq_helper(get_group_servers_dict(CONFIG_PATH), get_global_setting(CONFIG_PATH, "ONEBOT_HTTP"))
+    init_to_qq_helper(get_group_servers_dict(CONFIG_PATH), get_global_setting(CONFIG_PATH, "ONEBOT_HTTP"))
     init_mcc_message(get_group_servers_dict(CONFIG_PATH))
     def msg_handler(server_name:str, msg:str, message_type: MessageType) -> None:
         if message_type != MessageType.UNKNOWN:

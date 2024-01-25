@@ -10,7 +10,7 @@ SERVER_GROUP_DICT = {}
 
 GROUP_ID = 0
 
-def init_qq_helper(group_server_dict: dict, onebot_http: str):
+def init_to_qq_helper(group_server_dict: dict, onebot_http: str):
     """
     初始化qq_helper
 
