@@ -19,7 +19,7 @@ Chat across multiple Minecraft servers and QQ groups with No Server configuratio
 - [x] 实现命令交互控制
 
 ## Bug List
-- [ ] <Ctrl-C> 无法正常退出程序，会报Exception
+- [x] <Ctrl-C> 无法正常退出程序，会报Exception
 
 ## Configuration Help
 
