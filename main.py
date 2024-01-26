@@ -27,7 +27,10 @@ def main():
             to_qq_helper.send_to_qqgroup(server_name, msg)
             mcc_message_helpler.send_msg_to_other_mccs(server_name, msg)
     def on_exit():
-        mcc_client_helper.stop_mccs(mcc_config_helper.get_server_list(CONFIG_PATH, True))
+        group_list = mcc_group_helper.get_started_groups()
+        for group_id in group_list:
+            mcc_client_helper.stop_mccs(mcc_config_helper.get_group_sever_list(CONFIG_PATH,group_id, True))
+        
     # 死循环，接受用户输入
     try:
         ok_logger.get_logger().info("欢迎使用 Mc-QQ-bridge！ 输入Help获取帮助")
@@ -38,12 +41,18 @@ def main():
                 case cli_helper.CmdType.SWITCH_STATE:
                     """切换状态"""
                     group_id = mcc_group_helper.get_id_from_cli(CONFIG_PATH)
-                    # 开始mccs
-                    ok_logger.get_logger().info(f"正在启动 {group_id}")
-                    mcc_group_helper.start_mcc(group_id, CONFIG_PATH, "12345678")
-                    
-                    # 连接mcc的websocket
-                    mcc_group_helper.connect_mcc_ws(group_id,CONFIG_PATH, msg_handler)
+
+                    if not mcc_group_helper.is_start(group_id):
+                        # 开始mccs
+                        ok_logger.get_logger().info(f"正在启动 {group_id}")
+                        mcc_group_helper.start_mcc(group_id, CONFIG_PATH, "12345678")
+                        
+                        # 连接mcc的websocket
+                        mcc_group_helper.connect_mcc_ws(group_id,CONFIG_PATH, msg_handler)
+
+                    else:
+                        ok_logger.get_logger().info(f"正在关闭 {group_id}")
+                        mcc_group_helper.stop_mcc(group_id, CONFIG_PATH)
 
                 case cli_helper.CmdType.ATTACH:
                     """附加tmux"""
