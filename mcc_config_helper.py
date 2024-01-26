@@ -3,12 +3,19 @@ import toml
 from os import mkdir, path
 from dict_util import replace_values_recursive
 
-def load_config(config_json_name: str, mcc_ini_template: str, tmp_folder: str):
+CONFIG_PATH: str
+
+def init(config_path: str, mcc_ini_template: str, tmp_folder: str):
+    global CONFIG_PATH
+    CONFIG_PATH = config_path
+    _load_config(mcc_ini_template, tmp_folder)
+
+def _load_config(mcc_ini_template: str, tmp_folder: str):
     """
-    config_json_name 用于修改mcc配置的json配置文件
+    config_path 用于修改mcc配置的json配置文件
     mcc_ini_template 第一次运行mcc时生成的文件
     """
-    with open(config_json_name, 'r') as config_json_file:
+    with open(CONFIG_PATH, 'r') as config_json_file:
         config_json = json.load(config_json_file)
         
     with open(mcc_ini_template, 'r') as mcc_config_template_file:
@@ -31,13 +38,13 @@ def load_config(config_json_name: str, mcc_ini_template: str, tmp_folder: str):
         with open(f"{tmp_folder}/{server_name}.ini", "w") as output_file:
             toml.dump(mcc_config_template_json, output_file)
 
-def get_server_list(config_json_name: str, ignore_disabled: bool = True) -> list:
+def get_server_list(ignore_disabled: bool = True) -> list:
     """
     获取配置文件中服务器名列表
     
     ignore_disabled 是否排除未启用的服务器
     """
-    with open(config_json_name, 'r') as config_json_file:
+    with open(CONFIG_PATH, 'r') as config_json_file:
         config_json = json.load(config_json_file)
 
     result = []
@@ -48,7 +55,7 @@ def get_server_list(config_json_name: str, ignore_disabled: bool = True) -> list
 
     return result
 
-def _get_server_config_dict(config_json_name: str, ignore_disabled: bool = True) -> dict:
+def _get_server_config_dict(ignore_disabled: bool = True) -> dict:
     """
     <server_name, config_dict>
     
@@ -56,7 +63,7 @@ def _get_server_config_dict(config_json_name: str, ignore_disabled: bool = True)
 
     其中config_dict详细请看config.json的 Servers.server_name.Config
     """
-    with open(config_json_name, 'r') as config_json_file:
+    with open(CONFIG_PATH, 'r') as config_json_file:
         config_json = json.load(config_json_file)
 
     result = {}
@@ -68,13 +75,13 @@ def _get_server_config_dict(config_json_name: str, ignore_disabled: bool = True)
 
     return result
 
-def get_group_servers_dict(config_json_name: str, ignore_disabled: bool = True) -> dict[str, list[str]]:
+def get_group_servers_dict(ignore_disabled: bool = True) -> dict[str, list[str]]:
     """
     <群号, 服务器列表> 的dict
     
     ignore_disabled 是否排除未启用的服务器
     """
-    with open(config_json_name, 'r') as config_json_file:
+    with open(CONFIG_PATH, 'r') as config_json_file:
         config_json = json.load(config_json_file)
 
     groups = config_json["Groups"]
@@ -82,33 +89,33 @@ def get_group_servers_dict(config_json_name: str, ignore_disabled: bool = True) 
     if ignore_disabled:
         new_groups = {}
         for group_id, server_list in groups.items():
-            new_list = [server_name for server_name in server_list if is_server_enabled(config_json_name, server_name)]
+            new_list = [server_name for server_name in server_list if is_server_enabled(server_name)]
             new_groups[group_id] = new_list
 
         groups = new_groups
 
     return groups
 
-def get_global_setting(config_json_name: str, key: str) -> any:
+def get_global_setting(key: str) -> any:
     """获取全局设置，即根节点“Settings”中内容"""
-    with open(config_json_name, 'r') as config_json_file:
+    with open(CONFIG_PATH, 'r') as config_json_file:
         config_json = json.load(config_json_file)
     return config_json["Settings"][key]
 
-def get_account(config_json_name: str, server_name: str) -> str:
-    with open(config_json_name, 'r') as config_json_file:
+def get_account(server_name: str) -> str:
+    with open(CONFIG_PATH, 'r') as config_json_file:
         config_json = json.load(config_json_file)
     account_name = config_json["Servers"][server_name]["Account"]
     return config_json["Accounts"][account_name]["Account"]["Login"]
 
-def get_server_config(config_path:str, server_name: str) -> dict:
-    return _get_server_config_dict(config_path, True)[server_name]
+def get_server_config(server_name: str, ignore_disabled=True) -> dict:
+    return _get_server_config_dict(ignore_disabled)[server_name]
 
-def is_server_enabled(config_json_name: str,server_name: str):
-    return server_name in get_server_list(config_json_name, True)
+def is_server_enabled(server_name: str):
+    return server_name in get_server_list(ignore_disabled=True)
 
-def get_group_sever_list(config_path:str, group_id: set, ignore_disabled: bool = True) -> list[str]:
-    return get_group_servers_dict(config_path, ignore_disabled)[group_id]
+def get_group_sever_list(group_id: set, ignore_disabled: bool = True) -> list[str]:
+    return get_group_servers_dict(ignore_disabled)[group_id]
 
 # def main():
 #     load_config("config.json", "mcc_config_template.ini", "./tmp")

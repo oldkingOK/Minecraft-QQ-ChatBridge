@@ -13,29 +13,29 @@ def is_start(group_id: str):
     global started_list
     return group_id in started_list
 
-def start_mcc(group_id: str, config_path: str, sudo_passwd: str | None):
+def start_mcc(group_id: str, sudo_passwd: str | None):
     global started_list
     started_list.append(group_id)
 
     # 启动mcc
-    server_list = mcc_config_helper.get_group_sever_list(config_path, group_id)
+    server_list = mcc_config_helper.get_group_sever_list(group_id)
     for server_name in server_list:
-        if not mcc_config_helper.is_server_enabled(config_path, server_name): continue
+        if not mcc_config_helper.is_server_enabled(server_name): continue
         mcc_client_helper.start_mcc(server_name=server_name, sudo_passwd=sudo_passwd)
 
-def stop_mcc(group_id: str, config_path: str):
+def stop_mcc(group_id: str):
     global started_list
     started_list.remove(group_id)
-    server_list = mcc_config_helper.get_group_sever_list(config_path, group_id)
+    server_list = mcc_config_helper.get_group_sever_list(group_id)
     mcc_client_helper.stop_mccs(server_list)
 
-def connect_mcc_ws(group_id: str, config_path: str, msg_handler: Callable[[str, str, MessageType], None]):
+def connect_mcc_ws(group_id: str, msg_handler: Callable[[str, str, MessageType], None]):
     functions = []
     """异步执行的任务列表"""
-    server_list = mcc_config_helper.get_group_sever_list(config_path, group_id, True)
+    server_list = mcc_config_helper.get_group_sever_list(group_id, True)
     for server_name in server_list:
-        config = mcc_config_helper.get_server_config(config_path, server_name)
-        account_name = mcc_config_helper.get_account(config_path, server_name)
+        config = mcc_config_helper.get_server_config(server_name)
+        account_name = mcc_config_helper.get_account(server_name)
         ws_config = config["ChatBot"]["WebSocketBot"]
         ip = ws_config["Ip"]
         port = ws_config["Port"]
@@ -49,20 +49,20 @@ def connect_mcc_ws(group_id: str, config_path: str, msg_handler: Callable[[str, 
     for thread in threads:
         thread.start()
 
-def get_group_servers_dict(config_path: str,ignore_disabled: bool = True) -> dict[str,str]:
+def get_group_servers_dict(ignore_disabled: bool = True) -> dict[str,str]:
     """
     获取群组消息
     dict<群组名, 服务器列表>
     """
-    return mcc_config_helper.get_group_servers_dict(config_path, ignore_disabled)
+    return mcc_config_helper.get_group_servers_dict(ignore_disabled)
 
-def get_id_from_cli(config_path: str) -> str | None:
+def get_id_from_cli() -> str | None:
     """
     通过用户输入，获取群号
     非法输入，返回None
     """
 
-    group_data_dict = get_group_servers_dict(config_path, True)
+    group_data_dict = get_group_servers_dict(ignore_disabled=True)
     ok_logger.get_logger().info("请选择群组序号：（已省略关闭的服务器）")
     # 打印组信息
     for index, (group_id, server_list) in enumerate(group_data_dict.items()):
