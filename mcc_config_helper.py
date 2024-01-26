@@ -101,6 +101,9 @@ def get_account(config_json_name: str, server_name: str) -> str:
     account_name = config_json["Servers"][server_name]["Account"]
     return config_json["Accounts"][account_name]["Account"]["Login"]
 
+def get_server_config(config_name:str, server_name: str) -> dict:
+    return get_server_config_dict(config_name, True)[server_name]
+
 def is_server_enabled(config_json_name: str,server_name: str):
     return server_name in get_server_list(config_json_name, True)
     

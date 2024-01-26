@@ -7,9 +7,8 @@ import mcc_message_helpler
 import mcc_group_helper
 import ok_logger
 import cli_helper
-from to_qq_helper import init_to_qq_helper, send_to_qqgroup
+import to_qq_helper
 from tmux_helper import init_tmux, attach_mcc
-import threading
 
 MCC_PATH = "/home/oldkingok/Minecraft-QQ-ChatBridge/Minecraft-Console-Client/MinecraftClient/bin/Release/net7.0/linux-arm64/publish/MinecraftClient"
 CONFIG_PATH = "./asset/config.json"
@@ -20,12 +19,12 @@ def main():
     init_tmux()
     
     # 初始化qqbot_helper, mcc_message_helper，用于发送qq消息和发送服务器消息
-    init_to_qq_helper(mcc_config_helper.get_group_servers_dict(CONFIG_PATH),
+    to_qq_helper.init(mcc_config_helper.get_group_servers_dict(CONFIG_PATH),
                        mcc_config_helper.get_global_setting(CONFIG_PATH, "ONEBOT_HTTP"))
     mcc_message_helpler.init(mcc_config_helper.get_group_servers_dict(CONFIG_PATH))
     def msg_handler(server_name:str, msg:str, message_type: MessageType) -> None:
         if message_type != MessageType.UNKNOWN:
-            send_to_qqgroup(server_name, msg)
+            to_qq_helper.send_to_qqgroup(server_name, msg)
             mcc_message_helpler.send_msg_to_other_mccs(server_name, msg)
     def on_exit():
         mcc_client_helper.stop_mccs(mcc_config_helper.get_server_list(CONFIG_PATH, True))
@@ -41,8 +40,11 @@ def main():
                     group_id = mcc_group_helper.get_id_from_cli(CONFIG_PATH)
                     # 开始mccs
                     ok_logger.get_logger().info(f"正在启动 {group_id}")
-                    mcc_group_helper.start(group_id, CONFIG_PATH, "12345678")
+                    mcc_group_helper.start_mcc(group_id, CONFIG_PATH, "12345678")
                     
+                    # 连接mcc的websocket
+                    mcc_group_helper.connect_mcc_ws(group_id,CONFIG_PATH, msg_handler)
+
                 case cli_helper.CmdType.ATTACH:
                     """附加tmux"""
                     ok_logger.pause()
@@ -60,25 +62,6 @@ def main():
         on_exit()
 
     return
-    
-    # 连接mcc的websocket
-    server_config_dict = mcc_config_helper.get_server_config_dict(CONFIG_PATH)
-    functions = []
-    """异步执行的任务列表"""
-    for server_name, config in server_config_dict.items():
-        account_name = mcc_config_helper.get_account(CONFIG_PATH, server_name)
-        ws_config = config["ChatBot"]["WebSocketBot"]
-        ip = ws_config["Ip"]
-        port = ws_config["Port"]
-        passwd = ws_config["Password"]
-        
-        functions.append(lambda s=server_name, a=account_name, i=ip, p=port, pw=passwd, mh=msg_handler: start_ws(s, a, i, p, pw, mh))
-        
-    # 创建线程并运行
-    threads = [threading.Thread(target=func) for func in functions]
-
-    for thread in threads:
-        thread.start()
 
 if __name__ == "__main__":
     main()

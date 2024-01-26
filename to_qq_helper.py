@@ -10,7 +10,7 @@ SERVER_GROUP_DICT = {}
 
 GROUP_ID = 0
 
-def init_to_qq_helper(group_server_dict: dict, onebot_http: str):
+def init(group_server_dict: dict, onebot_http: str):
     """
     初始化qq_helper
 
@@ -34,5 +34,4 @@ def send_to_qqgroup(server_name: str, msg: str):
     
     global ONEBOT_HTTP, SEND_GROUP_MSG_API
     group_id = SERVER_GROUP_DICT[server_name]
-    msg = f"[{server_name}] {remove_color_char(msg)}"
     requests.get(SEND_GROUP_MSG_API.format(ONEBOT_HTTP, group_id) + msg)
