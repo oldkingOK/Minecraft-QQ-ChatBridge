@@ -57,7 +57,10 @@ def get_group_servers_dict(config_path: str,ignore_disabled: bool = True) -> dic
     return mcc_config_helper.get_group_servers_dict(config_path, ignore_disabled)
 
 def get_id_from_cli(config_path: str) -> str | None:
-    """通过用户输入，获取群号"""
+    """
+    通过用户输入，获取群号
+    非法输入，返回None
+    """
 
     group_data_dict = get_group_servers_dict(config_path, True)
     ok_logger.get_logger().info("请选择群组序号：（已省略关闭的服务器）")
@@ -67,6 +70,8 @@ def get_id_from_cli(config_path: str) -> str | None:
     # 获取组序号
     group_id_list = list(group_data_dict.keys())
     index = cli_helper.select_from_numbers(range(len(group_id_list)))
+    # 合法判断
+    if index is None: return None
     return group_id_list[index]
 
 def get_started_groups() -> list[str]:

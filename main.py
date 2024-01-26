@@ -41,6 +41,9 @@ def main():
                 case cli_helper.CmdType.SWITCH_STATE:
                     """切换状态"""
                     group_id = mcc_group_helper.get_id_from_cli(CONFIG_PATH)
+                    if group_id is None:
+                        ok_logger.get_logger().info("非法输入！退出...")
+                        continue
 
                     if not mcc_group_helper.is_start(group_id):
                         # 开始mccs

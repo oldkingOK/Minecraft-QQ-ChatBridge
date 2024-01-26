@@ -1,7 +1,10 @@
 from prompt_toolkit import prompt
+from prompt_toolkit.history import InMemoryHistory
 from prompt_toolkit.completion import WordCompleter
 from ok_logger import get_logger
 from enum import Enum, auto
+
+history = InMemoryHistory()
 
 class CmdType(Enum):
     SWITCH_STATE = auto()
@@ -15,9 +18,9 @@ def get_cmd() -> tuple[CmdType, bool]:
     CmdType 命令种类
     bool handled
     """
-
+    global history
     command_completer = WordCompleter(words=['SwitchState', 'Help', 'Attach', 'Exit'], ignore_case=True)
-    text = prompt('> ', completer=command_completer)
+    text = prompt('> ', completer=command_completer, history=history)
     match text:
         case "SwitchState": return CmdType.SWITCH_STATE, False
         case "Attach": return CmdType.ATTACH, False
@@ -36,8 +39,16 @@ def print_help():
                 "提示：使用<Tab>可以补全命令"
             )
     
-def select_from_numbers(num_list: list[int]) -> int:
-    """从列表中选择，返回序号"""
+def select_from_numbers(num_list: list[int]) -> int | None:
+    """
+    从列表中选择，返回序号
+    如果非法输入，就返回None
+    """
+    global history
     command_completer = WordCompleter(words=[str(i) for i in range(len(num_list))], ignore_case=True)
-    index = int(prompt('> ', completer=command_completer))
+    try:
+        index = int(prompt('> ', completer=command_completer, history=history))
+    except ValueError:
+        return None
+    if index not in num_list: return None
     return index
