@@ -107,10 +107,8 @@ def get_server_config(config_path:str, server_name: str) -> dict:
 def is_server_enabled(config_json_name: str,server_name: str):
     return server_name in get_server_list(config_json_name, True)
 
-def get_group_sever_list(config_path:str, group_id: set, ignore_disabled: bool = True):
-    group_servers = get_group_servers_dict(config_path, ignore_disabled)
-    return group_servers[group_id]
-    
+def get_group_sever_list(config_path:str, group_id: set, ignore_disabled: bool = True) -> list[str]:
+    return get_group_servers_dict(config_path, ignore_disabled)[group_id]
 
 # def main():
 #     load_config("config.json", "mcc_config_template.ini", "./tmp")
