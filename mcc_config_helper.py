@@ -31,9 +31,11 @@ def load_config(config_json_name: str, mcc_ini_template: str, tmp_folder: str):
         with open(f"{tmp_folder}/{server_name}.ini", "w") as output_file:
             toml.dump(mcc_config_template_json, output_file)
 
-def get_server_list(config_json_name: str) -> list:
+def get_server_list(config_json_name: str, ignore_disabled: bool = True) -> list:
     """
-    获取配置文件中Enabled的服务器名列表
+    获取配置文件中服务器名列表
+    
+    ignore_disabled 是否排除未启用的服务器
     """
     with open(config_json_name, 'r') as config_json_file:
         config_json = json.load(config_json_file)
@@ -42,15 +44,15 @@ def get_server_list(config_json_name: str) -> list:
     servers = config_json["Servers"]
     for server_name in servers:
         server = servers[server_name]
-        if server["Enabled"]: result.append(server_name)
+        if ignore_disabled and server["Enabled"]: result.append(server_name)
 
     return result
 
-def get_server_config_dict(config_json_name: str) -> dict:
+def get_server_config_dict(config_json_name: str, ignore_disabled: bool = True) -> dict:
     """
     <server_name, config_dict>
     
-    自动排除未启用的服务器
+    ignore_disabled 是否排除未启用的服务器
 
     其中config_dict详细请看config.json的 Servers.server_name.Config
     """
@@ -61,17 +63,31 @@ def get_server_config_dict(config_json_name: str) -> dict:
     servers = config_json["Servers"]
     for server_name in servers:
         server = servers[server_name]
-        if not server["Enabled"]: continue
+        if ignore_disabled and not server["Enabled"]: continue
         result[server_name] = server["Config"]
 
     return result
 
-def get_group_servers_dict(config_json_name: str) -> dict:
-    """<群号, 服务器列表> 的dict"""
+def get_group_servers_dict(config_json_name: str, ignore_disabled: bool = True) -> dict[str, list[str]]:
+    """
+    <群号, 服务器列表> 的dict
+    
+    ignore_disabled 是否排除未启用的服务器
+    """
     with open(config_json_name, 'r') as config_json_file:
         config_json = json.load(config_json_file)
 
-    return config_json["Groups"]
+    groups = config_json["Groups"]
+    # 如果要排除，就遍历
+    if ignore_disabled:
+        new_groups = {}
+        for group_id, server_list in groups.items():
+            new_list = [server_name for server_name in server_list if is_server_enabled(config_json_name, server_name)]
+            new_groups[group_id] = new_list
+
+        groups = new_groups
+
+    return groups
 
 def get_global_setting(config_json_name: str, key: str) -> any:
     """获取全局设置，即根节点“Settings”中内容"""
@@ -84,6 +100,10 @@ def get_account(config_json_name: str, server_name: str) -> str:
         config_json = json.load(config_json_file)
     account_name = config_json["Servers"][server_name]["Account"]
     return config_json["Accounts"][account_name]["Account"]["Login"]
+
+def is_server_enabled(config_json_name: str,server_name: str):
+    return server_name in get_server_list(config_json_name, True)
+    
 
 # def main():
 #     load_config("config.json", "mcc_config_template.ini", "./tmp")

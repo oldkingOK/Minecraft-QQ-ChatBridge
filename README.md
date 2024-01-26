@@ -16,6 +16,10 @@ Chat across multiple Minecraft servers and QQ groups with No Server configuratio
 - [x] 自动配置开启mcc，并允许附加到mcc上
 - [ ] 实现多服务器、多qq群支持
 - [ ] 实现管理员私聊发送信息操作chatbridge
+- [x] 实现命令交互控制
+
+## Bug List
+- [ ] <Ctrl-C> 无法正常退出程序，会报Exception
 
 ## Configuration Help
 

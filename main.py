@@ -4,7 +4,9 @@ from mcc_ws_helper import start_ws, MessageType
 import mcc_config_helper
 import mcc_client_helper
 import mcc_message_helpler
+import mcc_group_helper
 import ok_logger
+import cli_helper
 from to_qq_helper import init_to_qq_helper, send_to_qqgroup
 from tmux_helper import init_tmux, attach_mcc
 import threading
@@ -25,11 +27,39 @@ def main():
         if message_type != MessageType.UNKNOWN:
             send_to_qqgroup(server_name, msg)
             mcc_message_helpler.send_msg_to_other_mccs(server_name, msg)
+    def on_exit():
+        mcc_client_helper.stop_mccs(mcc_config_helper.get_server_list(CONFIG_PATH, True))
+    # 死循环，接受用户输入
+    try:
+        ok_logger.get_logger().info("欢迎使用 Mc-QQ-bridge！ 输入Help获取帮助")
+        while True:
+            cmdType, handed = cli_helper.get_cmd()
+            if handed: continue
+            match cmdType:
+                case cli_helper.CmdType.SWITCH_STATE:
+                    """切换状态"""
+                    group_id = mcc_group_helper.get_id_from_cli(CONFIG_PATH)
+                    # 开始mccs
+                    ok_logger.get_logger().info(f"正在启动 {group_id}")
+                    mcc_group_helper.start(group_id, CONFIG_PATH, "12345678")
+                    
+                case cli_helper.CmdType.ATTACH:
+                    """附加tmux"""
+                    ok_logger.pause()
+                    # TODO 附加指定群组
+                    attach_mcc()
+                    ok_logger.start()
+                    print()
+                case cli_helper.CmdType.EXIT:
+                    ok_logger.get_logger().info("退出程序")
+                    on_exit()
+                    break
+            
+    except KeyboardInterrupt:
+        ok_logger.get_logger().info("KeyboardInterrupt, Exit...")
+        on_exit()
 
-    # 启动mcc
-    server_list = mcc_config_helper.get_server_list(CONFIG_PATH)
-    for server_name in server_list:
-        mcc_client_helper.start_mcc(server_name=server_name, passwd="12345678")
+    return
     
     # 连接mcc的websocket
     server_config_dict = mcc_config_helper.get_server_config_dict(CONFIG_PATH)
@@ -49,18 +79,6 @@ def main():
 
     for thread in threads:
         thread.start()
-
-    # 死循环，接受用户输入
-    try:
-        while True:
-            input("Press enter to attach, and <Ctrl-b> <d> to detach\n")
-            ok_logger.pause()
-            attach_mcc()
-            ok_logger.start()
-    except KeyboardInterrupt:
-        ok_logger.get_logger().info("KeyboardInterrupt, Exit...")
-        mcc_client_helper.stop_mccs(mcc_config_helper.get_server_list(CONFIG_PATH))
-
 
 if __name__ == "__main__":
     main()

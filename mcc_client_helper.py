@@ -11,19 +11,19 @@ def init(tmp_folder: str, mcc_path: str):
     TMP_FOLDER = tmp_folder
     MCC_PATH = mcc_path
 
-def start_mcc(server_name: str, passwd: str | None):
+def start_mcc(server_name: str, sudo_passwd: str | None):
     """
     运行一个mcc
-    如果passwd为None，就不使用sudo
+    如果sudo_passwd为None，就不使用sudo
     """
-    if passwd is not None:
+    if sudo_passwd is not None:
         cmd = "sudo -E "
     else: cmd = ""
 
     cmd += f"{MCC_PATH} {TMP_FOLDER}/{server_name}.ini"
     add_mcc_pane(server_name)
     send_cmd(server_name, cmd)
-    if passwd is not None: send_cmd(server_name, PASSWD)
+    if sudo_passwd is not None: send_cmd(server_name, PASSWD)
 
 def stop_mccs(server_list: list):
     for server_name in server_list: send_cmd(server_name, "/quit")
