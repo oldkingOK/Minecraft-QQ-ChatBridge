@@ -6,11 +6,11 @@ import ok_logger
 找到对应的server pane然后转移到群号window
 """
 SESSION_NAME="mcc"
-source_session = None
+source_session: libtmux.session.Session = None
 """session"""
-source_window = None
+source_window: libtmux.window.Window = None
 """源window，临时存储所有Pane"""
-server_pane_dict = {}
+server_pane_dict: dict[str, libtmux.Pane] = {}
 """存储 <server_name, Pane> 键值对"""
 
 def init_tmux():
@@ -34,6 +34,9 @@ def add_mcc_pane(server_name: str):
     pane = source_window.split_window()
     server_pane_dict[server_name] = pane
     pane.send_keys(cmd="test", enter=True)
+
+def kill_mcc_pane(server_name: str):
+    server_pane_dict[server_name].cmd('kill-pane')
 
 def send_cmd(server_name: str, cmd: str):
     """

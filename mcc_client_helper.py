@@ -1,4 +1,4 @@
-from tmux_helper import add_mcc_pane, send_cmd
+import tmux_helper
 
 TMP_FOLDER = ""
 """临时ini存储文件夹"""
@@ -21,16 +21,18 @@ def start_mcc(server_name: str, sudo_passwd: str | None):
     else: cmd = ""
 
     cmd += f"{MCC_PATH} {TMP_FOLDER}/{server_name}.ini"
-    add_mcc_pane(server_name)
-    send_cmd(server_name, cmd)
-    if sudo_passwd is not None: send_cmd(server_name, PASSWD)
+    tmux_helper.add_mcc_pane(server_name)
+    tmux_helper.send_cmd(server_name, cmd)
+    if sudo_passwd is not None: tmux_helper.send_cmd(server_name, PASSWD)
 
 def stop_mccs(server_list: list):
-    for server_name in server_list: send_cmd(server_name, "/quit")
+    for server_name in server_list:
+        tmux_helper.send_cmd(server_name, "/quit")
+        tmux_helper.kill_mcc_pane(server_name)
 
 def send_msg(server_name: str, msg: str):
     """向服务器发消息"""
-    send_cmd(server_name, msg)
+    tmux_helper.send_cmd(server_name, msg)
 # def main():
 #     init_mcc_starter("config.json", "mcc_config_template.ini", "./tmp", "/home/oldkingok/Minecraft-QQ-ChatBridge/Minecraft-Console-Client/MinecraftClient/bin/Release/net7.0/linux-arm64/publish/MinecraftClient")
     
