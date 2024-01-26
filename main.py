@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from mcc_ws_helper import start_ws, MessageType
+from mcc_ws_helper import MessageType
 import mcc_config_helper
 import mcc_client_helper
 import mcc_message_helpler
