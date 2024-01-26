@@ -1,5 +1,6 @@
 from bot import Bot
 import lib.tmux_helper as tmux_helper
+import ok_logger
 
 class Group:
     def __init__(self, group_name: str) -> None:
@@ -19,11 +20,16 @@ class Group:
             bot.start_listen()
 
     def stop(self):
+        if not self.running: return
         self.running = False
         for bot in list(self.bots.values()):
             bot.stop()
 
     def attach(self):
+        if not self.running: 
+            ok_logger.get_logger().info(f"组 {self.group_name} 未启动！")
+            return
+        
         mcc_bot_list: list[str] = []
         for name in list(self.bots.keys()):
             if self.group_name == name: continue
