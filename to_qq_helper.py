@@ -4,9 +4,9 @@ from text_util import remove_color_char
 SEND_GROUP_MSG_API = "{0}/send_group_msg?group_id={1}&message="
 ONEBOT_HTTP = ""
 GROUP_SERVER_DICT = {}
-"""群号-服务器名列表，用于从群聊发送到服务器"""
+"""<群号，服务器名列表>，用于从群聊发送到服务器"""
 SERVER_GROUP_DICT = {}
-"""服务器名-群号，用于从服务器发消息到群聊"""
+"""<服务器名，群号>，用于从服务器发消息到群聊"""
 
 GROUP_ID = 0
 
