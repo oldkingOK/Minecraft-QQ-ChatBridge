@@ -1,5 +1,4 @@
 from websockets.sync.client import connect
-from websockets import ConnectionClosed, ConnectionClosedError
 
 from text_util import remove_color_char
 from typing import Callable
@@ -8,6 +7,7 @@ import json
 import re
 import time
 import ok_logger
+import traceback
 
 server_websocket_dict = {}
 """存放 <server_name, websocket> 键值对"""
@@ -29,6 +29,7 @@ class MessageType(Enum):
     """已发送的消息，比如<QQbot> Test"""
     ACHIEVEMENT = auto()
     DISCONNECT = auto()
+    JOIN_LEAVE = auto()
 
 def start_ws(server_name, account_name, ip, port, passwd, msg_handler: Callable[[str, str, MessageType], None]):
     """
@@ -101,11 +102,13 @@ def start_recv(server_name: str, account_name:str, msg_handler: Callable[[str, s
             message = remove_color_char(websocket.recv())
             handle_result, message_type = handle_mcc_json(account_name, mcc_json=json.loads(message))
             if handle_result is not None: 
+                msg = f"[{server_name}] {handle_result}"
                 ok_logger.get_logger().debug(f"{server_name} received: [{handle_result}], which type is {message_type.name}")
-                msg_handler(server_name, handle_result, message_type)
+                msg_handler(server_name, msg, message_type)
     
     except BaseException as exception:
         ok_logger.get_logger().info(f"Server {server_name} Catch exception: {exception}, Exit")
+        ok_logger.get_logger().debug(traceback.format_exc())
 
 
 def handle_mcc_json(account_name:str, mcc_json) -> str | None:
@@ -130,6 +133,8 @@ def handle_mcc_json(account_name:str, mcc_json) -> str | None:
             """
             text = json.loads(mcc_json["data"])["text"]
 
+            pattern_join = r'([a-zA-Z0-9_]+) joined the game'
+            pattern_leave = r'([a-zA-Z0-9_]+) left the game'
             pattern_player_chat = r'^<([a-zA-Z0-9_]+)> (.+)$'
             """判断玩家聊天的正则表达式"""
             pattern_achievement = r'^([a-zA-Z0-9_]+) has made the advancement.*'
@@ -145,13 +150,20 @@ def handle_mcc_json(account_name:str, mcc_json) -> str | None:
                 else: 
                     result = None
                     message_type = MessageType.SENT
+            
+            elif re.fullmatch(pattern_join, text) or re.fullmatch(pattern_leave, text):
+                if not is_my_self(account_name, text):
+                    result = text
+                    message_type = MessageType.JOIN_LEAVE
+
             elif re.fullmatch(pattern_achievement, text) or re.fullmatch(pattern_goal, text):
                 # ok_bot has made the advancement §a[§aDiamonds!]
-                if not text.startswith(f"{account_name} "):
+                if not is_my_self(account_name, text):
                     result = f"<喜报> {text}"
                     message_type = MessageType.ACHIEVEMENT
+
             elif is_death_msg(text):
-                if not text.startswith(f"{account_name} "):
+                if not is_my_self(account_name, text):
                     result = f"<悲报> {text}"
                     message_type = MessageType.DEATH
 
@@ -164,7 +176,7 @@ def handle_mcc_json(account_name:str, mcc_json) -> str | None:
                 建议向mcc提交pull request
                 """
                 msg = death_msg_translate(text)
-                if not text.startswith(f"{account_name} "):
+                if not is_my_self(account_name, msg):
                     result = f"<悲报> {msg}"
                     message_type = MessageType.DEATH
 
@@ -232,6 +244,13 @@ def death_msg_translate(text: str) -> str:
         msg = msg.replace(f"%{index}$s", splited[index])
 
     return msg
+
+def is_my_self(account_name: str, text: str) -> bool:
+    result = False
+    if text.startswith(f"{account_name} "): result = True
+    if text.startswith(f"* {account_name} "): result = True
+    if text.startswith(f"[{account_name}] "): result = True
+    return result
 
 # "oldkingOK was killed whilst fighting Fish"
 def test_death():
