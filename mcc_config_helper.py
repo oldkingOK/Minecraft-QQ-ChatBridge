@@ -4,11 +4,23 @@ from os import mkdir, path
 from dict_util import replace_values_recursive
 
 CONFIG_PATH: str
+SERVER_GROUP_MAP: dict[str,str] = {}
+"""<服务器名，群号> 对应表"""
 
 def init(config_path: str, mcc_ini_template: str, tmp_folder: str):
     global CONFIG_PATH
     CONFIG_PATH = config_path
     _load_config(mcc_ini_template, tmp_folder)
+    _init_server_group_map()
+
+def _init_server_group_map():
+    global SERVER_GROUP_MAP
+    server_group_dict = {}
+    for group_str, server_list in get_group_servers_dict().items():
+        for server_name in server_list:
+            server_group_dict[server_name] = group_str
+
+    SERVER_GROUP_MAP = server_group_dict
 
 def _load_config(mcc_ini_template: str, tmp_folder: str):
     """
@@ -116,6 +128,9 @@ def is_server_enabled(server_name: str):
 
 def get_group_sever_list(group_id: set, ignore_disabled: bool = True) -> list[str]:
     return get_group_servers_dict(ignore_disabled)[group_id]
+
+def get_group_by_server(server_name: str) -> str:
+    return SERVER_GROUP_MAP[server_name]
 
 # def main():
 #     load_config("config.json", "mcc_config_template.ini", "./tmp")
