@@ -5,7 +5,7 @@ class OkFormatter(logging.Formatter):
         log_time = self.formatTime(record, "%H:%M:%S")  # 格式化时间
         log_message = record.getMessage()  # 获取日志消息
 
-        log_output = f"[{log_time}] [{record.filename}<line:{record.lineno}>/{record.levelname}]: {log_message}"
+        log_output = f"[{log_time}] [{record.filename[:-3]}:{record.lineno}/{record.levelname}]: {log_message}"
         return log_output
 
 class InfiniteBufferHandler(logging.Handler):
