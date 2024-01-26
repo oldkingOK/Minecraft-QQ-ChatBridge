@@ -48,7 +48,7 @@ def get_server_list(config_json_name: str, ignore_disabled: bool = True) -> list
 
     return result
 
-def get_server_config_dict(config_json_name: str, ignore_disabled: bool = True) -> dict:
+def _get_server_config_dict(config_json_name: str, ignore_disabled: bool = True) -> dict:
     """
     <server_name, config_dict>
     
@@ -101,11 +101,15 @@ def get_account(config_json_name: str, server_name: str) -> str:
     account_name = config_json["Servers"][server_name]["Account"]
     return config_json["Accounts"][account_name]["Account"]["Login"]
 
-def get_server_config(config_name:str, server_name: str) -> dict:
-    return get_server_config_dict(config_name, True)[server_name]
+def get_server_config(config_path:str, server_name: str) -> dict:
+    return _get_server_config_dict(config_path, True)[server_name]
 
 def is_server_enabled(config_json_name: str,server_name: str):
     return server_name in get_server_list(config_json_name, True)
+
+def get_group_sever_list(config_path:str, group_id: set, ignore_disabled: bool = True):
+    group_servers = get_group_servers_dict(config_path, ignore_disabled)
+    return group_servers[group_id]
     
 
 # def main():
