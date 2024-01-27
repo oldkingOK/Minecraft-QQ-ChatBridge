@@ -41,4 +41,5 @@ class QQbot(Bot):
         pass
 
     def stop(self) -> None:
+        qq_ws_helper.remove_listener(self.group_name)
         return super().stop()

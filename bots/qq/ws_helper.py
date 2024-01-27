@@ -60,3 +60,8 @@ def add_listener(qq_group_id: str, msg_handler: Callable[[str], None]):
 
     global _listeners
     _listeners[qq_group_id] = msg_handler
+
+def remove_listener(qq_group_id: str):
+    "删除群号指定监听器"
+    global _listeners
+    _listeners.pop(qq_group_id)
