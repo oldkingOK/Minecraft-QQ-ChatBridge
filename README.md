@@ -11,10 +11,10 @@ Chat across multiple Minecraft servers and QQ groups with No Server configuratio
 - [x] 将消息转发到qq群
 - [x] 将消息在服务器间互通
 - [ ] 并允许自定义开关和设定消息类型的频率
-- [ ] 从qq群转发信息到MCC，处理特殊信息
-- [ ] 与ChatImage mod联动以显示表情
+- [x] 从qq群转发信息到MCC，处理特殊信息
+- [x] 与ChatImage mod联动以显示表情
 - [x] 自动配置开启mcc，并允许附加到mcc上
-- [ ] 实现多服务器、多qq群支持
+- [x] 实现多服务器、多qq群支持
 - [ ] 实现管理员私聊发送信息操作chatbridge
 - [x] 实现命令交互控制
 
