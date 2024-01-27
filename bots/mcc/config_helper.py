@@ -3,7 +3,7 @@ import toml
 from os import mkdir, path
 from utils.dict_util import replace_values_recursive
 from enums import TMP_FOLDER, MCC_INI_TEMPLATE
-from bots.mcc.classes import Account, Server
+from bots.classes import Account, Server
 
 inited = False
 """该模块是否已初始化"""

@@ -15,6 +15,7 @@ def main():
     tmux_helper.init()
     config_helper.init()
     mcc_bot.init()
+    qq_bot.init()
 
     # 初始化group_manager
     for group_id, server_list in config_helper.get_groups().items():

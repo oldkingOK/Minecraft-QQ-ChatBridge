@@ -1,17 +1,39 @@
 from bot import Bot
-from group.group import Group
 import requests
 from enums import ONEBOT_HTTP, SEND_GROUP_MSG_API
+import bots.qq.ws_helper as qq_ws_helper
+import bots.qq.ws_msg_helper as qq_ws_msg_helper
+import group.group_manager as group_manager
+import ok_logger
+
+
+inited = False
+def init():
+    global inited
+    if inited: return
+    inited = True
+    qq_ws_helper.init()
+
+def _check_init():
+    if not inited: raise ImportError(f"模块 {__file__} 未初始化！")
 
 class QQbot(Bot):
     def __init__(self, group_name: str, bot_name: str) -> None:
+        _check_init()
         super().__init__(group_name, bot_name)
 
     def setup(self) -> None:
         return super().setup()
 
     def start_listen(self) -> None:
-        pass
+        def handle_msg(msg: str) -> None:
+            result = qq_ws_msg_helper.handle_qq_raw_msg(group_id=self.group_name, raw_msg=msg)
+            # 发送消息到同组其他成员
+            group = group_manager.get_group(self.group_name)
+            group.broadcast(result, self.group_name)
+            ok_logger.get_logger().info(f"{self.group_name} 收到qq消息：{result}")
+
+        qq_ws_helper.add_listener(self.group_name, handle_msg)
 
     def say(self, message: str) -> None:
         requests.get(SEND_GROUP_MSG_API.format(ONEBOT_HTTP, self.bot_name) + message)

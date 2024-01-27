@@ -145,7 +145,8 @@ def death_msg_translate(text: str) -> str:
 
 def is_my_self(account_name: str, text: str) -> bool:
     result = False
-    if text.startswith(f"{account_name} "): result = True
-    if text.startswith(f"* {account_name} "): result = True
-    if text.startswith(f"[{account_name}] "): result = True
+    if text.startswith(f"{account_name} "): result = True   # death or achievement
+    if text.startswith(f"<{account_name}> "): result = True # hi
+    if text.startswith(f"* {account_name} "): result = True # /me hi 
+    if text.startswith(f"[{account_name}] "): result = True # /say hi
     return result

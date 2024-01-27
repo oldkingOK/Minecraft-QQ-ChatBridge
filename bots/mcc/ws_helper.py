@@ -6,7 +6,8 @@ from websockets.sync.client import connect, ClientConnection
 from websockets.exceptions import ConnectionClosedError
 
 from typing import Callable
-from bots.mcc.classes import Server
+from bots.classes import Server
+from enums import RETRY_TIME
 import json
 import time
 import ok_logger
@@ -16,8 +17,6 @@ import bots.mcc.config_helper as mcc_config_helper
 
 DEATH_MESSAGE_DICT: dict[str,str] = {}
 """存放死亡消息的dict，用于翻译死亡消息"""
-RETRY_TIME = 3
-"""WebSocket重连尝试间隔（秒）"""
 
 def start_ws(server: Server, msg_handler: Callable[[str], None]):
     """

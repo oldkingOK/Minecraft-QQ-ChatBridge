@@ -37,8 +37,13 @@ class Group:
         # 附加
         tmux_helper.attach(mcc_bot_list)
 
-    def broadcast(self, message: str, except_bot: str | None):
+    def broadcast(self, message: str | list[str], except_bot: str | None):
         "向组内成员发送消息，除了except_bot以外"
         for bot in list(self.bots.values()):
             if except_bot != None and except_bot == bot.bot_name: continue
-            bot.say(message)
+            
+            if isinstance(message, list):
+                for line in message:
+                    bot.say(line)
+            else:
+                bot.say(message)
