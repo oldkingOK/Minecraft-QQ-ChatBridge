@@ -34,16 +34,16 @@ class MccBot(Bot):
 
     def start_listen(self) -> None:
         self.server.running = True
-        
-        def handle_msg(msg: str) -> None:
-            result, message_type = self.handle_raw_message(msg)
 
-            if result is not None and message_type is not MessageType.UNKNOWN: 
-                msg = f"[{self.server.name}] {result}"
-                ok_logger.get_logger().debug(f"服务器 {self.server.name} 收到: {result}, 消息种类：{message_type.name}")
-                group_manager.get_group(self.group_name).broadcast(msg, self.bot_name)
+        mcc_ws_helper.start_ws(self.server,self.on_message)
 
-        mcc_ws_helper.start_ws(self.server,handle_msg)
+    def on_message(self, message: str) -> None:
+        result, message_type = self.handle_raw_message(message)
+
+        if result is not None and message_type is not MessageType.UNKNOWN: 
+            message = f"[{self.server.name}] {result}"
+            ok_logger.get_logger().debug(f"服务器 {self.server.name} 收到: {result}, 消息种类：{message_type.name}")
+            group_manager.get_group(self.group_name).broadcast(message, self.bot_name)
 
     def handle_raw_message(self, message: str) -> tuple[str, MessageType]:
         # return: (result:str, message_type: MessageType)

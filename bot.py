@@ -1,17 +1,10 @@
 """
 往qq群和server插入Listener和Sender
 这个Listener和Sender
-- 在qq群是qq号
+- 在qq群是qq客户端
 - 在Server是mcc客户端
 
-因此定义基类：
-Bot
-- `__init__` bot初始化
-- `setup` 启动bot（告诉bot在哪个组
-- `start_listen` 开始听取
-- `handle_raw_message` 处理听取到的信息
-- `say` 在所在地方说话
-- `stop` 关闭bot
+因此定义基类 Bot
 """
 
 class Bot():
@@ -29,15 +22,23 @@ class Bot():
         print(f"{self.bot_name} 完成Setup！")
 
     def start_listen(self) -> None:
+        "开始收听所在地方的消息"
         while True:
-            msg = input("I\'m listening: ")
-            print(self.handle_raw_message(msg))
-        
+            msg = input(f"{self.bot_name} is listening: ")
+            self.on_message(msg)
+    
+    def on_message(self, message: str) -> None:
+        "当接收到消息，调用的函数"
+        print(self.handle_raw_message(message))
+
     def handle_raw_message(self, message: str) -> str:
+        "处理源消息（一般为json string），变为可发送的消息（如 <oldkingOK> ok）"
         return message
 
     def say(self, message: str) -> None:
+        "在所在地方说话"
         print(message)
 
     def stop(self) -> None:
+        "关闭bot"
         pass
