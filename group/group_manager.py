@@ -31,5 +31,5 @@ def get_group_from_cli() -> str | None:
     return group_id_list[index]
 
 def stop_all() -> None:
-    for group in list(groups.values()):
+    for group in groups.values():
         group.stop()

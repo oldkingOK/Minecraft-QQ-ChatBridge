@@ -15,14 +15,14 @@ class Group:
 
     def start(self):
         self.running = True
-        for bot in list(self.bots.values()):
+        for bot in self.bots.values():
             bot.setup()
             bot.start_listen()
 
     def stop(self):
         if not self.running: return
         self.running = False
-        for bot in list(self.bots.values()):
+        for bot in self.bots.values():
             bot.stop()
 
     def attach(self):
@@ -39,7 +39,7 @@ class Group:
 
     def broadcast(self, message: str | list[str], except_bot: str | None):
         "向组内成员发送消息，除了except_bot以外"
-        for bot in list(self.bots.values()):
+        for bot in self.bots.values():
             if except_bot != None and except_bot == bot.bot_name: continue
             
             if isinstance(message, list):
