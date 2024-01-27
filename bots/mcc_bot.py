@@ -38,7 +38,7 @@ class MccBot(Bot):
         def handle_msg(msg: str) -> None:
             result, message_type = self.handle_raw_message(msg)
 
-            if result is not None: 
+            if result is not None and message_type is not MessageType.UNKNOWN: 
                 msg = f"[{self.server.name}] {result}"
                 ok_logger.get_logger().debug(f"服务器 {self.server.name} 收到: {result}, 消息种类：{message_type.name}")
                 group_manager.get_group(self.group_name).broadcast(msg, self.bot_name)
