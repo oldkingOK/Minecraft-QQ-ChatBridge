@@ -5,7 +5,7 @@ import bots.mcc.ws_helper as mcc_ws_helper
 import bots.mcc.ws_msg_helper as mcc_ws_msg_helper
 import group.group_manager as group_manager
 from bots.mcc.config_helper import get_server
-from enums import MessageType
+from enums.common import MessageType
 
 inited = False
 def init():

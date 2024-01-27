@@ -1,6 +1,6 @@
 import lib.tmux_helper as tmux_helper
 import bots.mcc.config_helper as mcc_config_helper
-from enums import TMP_FOLDER, MCC_PATH, SUDO_PASSWD
+from enums.settings import TMP_FOLDER, MCC_PATH, SUDO_PASSWD
 
 inited = False
 """该模块是否已初始化"""

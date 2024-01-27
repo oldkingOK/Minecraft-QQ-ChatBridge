@@ -2,7 +2,7 @@ import config_helper as config_helper
 import toml
 from os import mkdir, path
 from utils.dict_util import replace_values_recursive
-from enums import TMP_FOLDER, MCC_INI_TEMPLATE
+from enums.settings import TMP_FOLDER, MCC_INI_TEMPLATE
 from bots.classes import Account, Server
 
 inited = False

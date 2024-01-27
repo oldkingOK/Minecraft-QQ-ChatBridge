@@ -1,6 +1,7 @@
 import json
 import requests
-from enums import GET_GROUP_MEMBER_INFO_API, ONEBOT_HTTP, GET_MSG_API
+from enums.constants import GET_GROUP_MEMBER_INFO_API, GET_MSG_API
+from enums.settings import ONEBOT_HTTP
 
 def is_qq_group_msg(qq_group_id: str, raw_message: str) -> bool:
     qq_json = json.loads(raw_message)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
+import config_helper
+from enums.common import CmdType
 import lib.tmux_helper as tmux_helper
 import lib.cli_helper as cli_helper
 import ok_logger
-import config_helper as config_helper
-from enums import CmdType
 
 # for test
 import bots.mcc_bot as mcc_bot
@@ -13,7 +13,6 @@ import group.group_manager as group_manager
 
 def main():
     tmux_helper.init()
-    config_helper.init()
     mcc_bot.init()
     qq_bot.init()
 

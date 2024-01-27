@@ -1,7 +1,15 @@
 {
     "Settings":
     {
-        "ONEBOT_HTTP": "http://127.0.0.1:5700"
+        "SUDO_PASSWD": "12345678",
+        "TMP_FOLDER": "{root}/tmp",
+        "MCC_INI_TEMPLATE": "{root}/asset/mcc_config_template.ini",
+        "MCC_PATH": "{root}/Minecraft-Console-Client/MinecraftClient/bin/Release/net7.0/linux-arm64/publish/MinecraftClient",
+
+        "ONEBOT_HTTP": "http://127.0.0.1:5700",
+        "ONEBOT_WS_HOST": "127.0.0.1",
+        "ONEBOT_WS_PORT": 12345,
+        "FACE_TO_LINK": false
     },
 
     "Groups":
@@ -70,7 +78,7 @@
                     }
                 }
             }
-        }
+                }
     },
 
     "Accounts":

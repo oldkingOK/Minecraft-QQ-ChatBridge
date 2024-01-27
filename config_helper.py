@@ -1,11 +1,11 @@
 import json
-from enums import CONFIG_PATH
+from enums.constants import CONFIG_PATH
 
 config_json: dict
 """存储config.json的数据，避免多次io操作"""
 
 inited = False
-def init():
+def _init():
     global inited, config_json
     inited = True
     with open(CONFIG_PATH, 'r') as config_json_file:
@@ -34,3 +34,5 @@ def get_servers() -> dict:
 def get_accounts() -> dict:
     _check_init()
     return config_json["Accounts"]
+
+if not inited: _init()

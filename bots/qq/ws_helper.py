@@ -5,7 +5,8 @@
 from websockets.server import serve, WebSocketServerProtocol
 from websockets.exceptions import ConnectionClosedError
 from bots.classes import Server
-from enums import ONEBOT_WS_HOST, ONEBOT_WS_PORT, RETRY_TIME
+from enums.settings import ONEBOT_WS_HOST, ONEBOT_WS_PORT
+from enums.constants import RETRY_TIME
 from typing import Callable
 import threading
 import asyncio

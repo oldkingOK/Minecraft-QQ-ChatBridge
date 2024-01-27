@@ -1,6 +1,7 @@
 from bot import Bot
 import requests
-from enums import ONEBOT_HTTP, SEND_GROUP_MSG_API
+from enums.settings import ONEBOT_HTTP
+from enums.constants import SEND_GROUP_MSG_API
 import bots.qq.ws_helper as qq_ws_helper
 import bots.qq.ws_msg_helper as qq_ws_msg_helper
 import group.group_manager as group_manager

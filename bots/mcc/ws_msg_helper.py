@@ -1,6 +1,7 @@
 import json, re
 import ok_logger
-from enums import MessageType, DEATH_MESSAGE_FILE
+from enums.common import MessageType
+from enums.constants import DEATH_MESSAGE_FILE
 from bots.mcc.config_helper import Server
 from utils.text_util import remove_color_char
 

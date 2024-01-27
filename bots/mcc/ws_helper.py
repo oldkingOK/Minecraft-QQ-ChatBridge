@@ -7,7 +7,7 @@ from websockets.exceptions import ConnectionClosedError
 
 from typing import Callable
 from bots.classes import Server
-from enums import RETRY_TIME
+from enums.constants import RETRY_TIME
 import json
 import time
 import ok_logger
