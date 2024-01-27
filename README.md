@@ -18,9 +18,6 @@ Chat across multiple Minecraft servers and QQ groups with No Server configuratio
 - [ ] 实现管理员私聊发送信息操作chatbridge
 - [x] 实现命令交互控制
 
-## Bug List
-- [x] <Ctrl-C> 无法正常退出程序，会报Exception
-
 ## Configuration Help
 
 ### Groups
