@@ -33,8 +33,6 @@ def handle_mcc_raw_msg(server: Server, raw_msg: str) -> tuple[str, MessageType]:
 
             pattern_join = r'([a-zA-Z0-9_]+) joined the game'
             pattern_leave = r'([a-zA-Z0-9_]+) left the game'
-            pattern_player_chat = r'^<([a-zA-Z0-9_]+)> (.+)$'
-            pattern_player_me = r'^\* ([a-zA-Z0-9_]+) (.+)$'
             """判断玩家聊天的正则表达式"""
             pattern_achievement = r'^([a-zA-Z0-9_]+) has made the advancement.*'
             """判断成就信息的正则表达式"""
@@ -42,8 +40,8 @@ def handle_mcc_raw_msg(server: Server, raw_msg: str) -> tuple[str, MessageType]:
             """判断进度信息的正则表达式"""
             pattern_death = r'^(\[death\.[a-zA-Z\.]+\]).*'
             """如果未翻译出来，那么就形如 [death.attack.genericKill.player] oldkingOK Zombie"""
-            if re.fullmatch(pattern_player_chat, text) or re.fullmatch(pattern_player_me, text):
-                if not is_my_self(server.account_name, text):
+            if (player_name := get_player_from_chat_msg(text)) != None:
+                if player_name != server.account_name:
                     result = text
                     message_type = MessageType.CHAT
                 else: 
@@ -51,18 +49,18 @@ def handle_mcc_raw_msg(server: Server, raw_msg: str) -> tuple[str, MessageType]:
                     message_type = MessageType.SENT
             
             elif re.fullmatch(pattern_join, text) or re.fullmatch(pattern_leave, text):
-                if not is_my_self(server.account_name, text):
+                if not text.startswith(server.account_name):
                     result = text
                     message_type = MessageType.JOIN_LEAVE
 
             elif re.fullmatch(pattern_achievement, text) or re.fullmatch(pattern_goal, text):
                 # ok_bot has made the advancement §a[§aDiamonds!]
-                if not is_my_self(server.account_name, text):
+                if not text.startswith(server.account_name):
                     result = f"<喜报> {text}"
                     message_type = MessageType.ACHIEVEMENT
 
             elif is_death_msg(text):
-                if not is_my_self(server.account_name, text):
+                if not text.startswith(server.account_name):
                     result = f"<悲报> {text}"
                     message_type = MessageType.DEATH
 
@@ -75,7 +73,7 @@ def handle_mcc_raw_msg(server: Server, raw_msg: str) -> tuple[str, MessageType]:
                 建议向mcc提交pull request
                 """
                 msg = death_msg_translate(text)
-                if not is_my_self(server.account_name, msg):
+                if not text.startswith(server.account_name):
                     result = f"<悲报> {msg}"
                     message_type = MessageType.DEATH
 
@@ -144,10 +142,20 @@ def death_msg_translate(text: str) -> str:
 
     return msg
 
-def is_my_self(account_name: str, text: str) -> bool:
-    result = False
-    if text.startswith(f"{account_name} "): result = True   # death or achievement
-    if text.startswith(f"<{account_name}> "): result = True # hi
-    if text.startswith(f"* {account_name} "): result = True # /me hi 
-    if text.startswith(f"[{account_name}] "): result = True # /say hi
-    return result
+def get_player_from_chat_msg(msg: str) -> str | None:
+    """
+    从聊天信息提取出player
+
+    返回值：
+    - player_name (str)
+    None 如果未提取出来
+    """
+    pattern_list = [
+        r'^<([a-zA-Z0-9_]+)> (.+)$',
+        r'^\* ([a-zA-Z0-9_]+) (.+)$',
+        r'^\[([a-zA-Z0-9_]+)\] (.+)$'
+    ]
+    for pattern in pattern_list:
+        match = re.match(pattern=pattern, string=msg)
+        if match: return match.group(1)
+    return None
