@@ -61,6 +61,7 @@ def main():
         ok_logger.get_logger().info("KeyboardInterrupt, 退出程序中...")
         group_manager.stop_all()
 
+    qq_bot.on_end()
     return
 
 if __name__ == "__main__":

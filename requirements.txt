@@ -1,4 +1,5 @@
-websockets==12.0
+websocket-client==1.7.0
+websocket-server==0.6.4
 toml==0.10.2
 libtmux==0.25.0
 requests==2.31.0

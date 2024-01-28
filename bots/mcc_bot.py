@@ -22,7 +22,6 @@ class MccBot(Bot):
         _check_init()
         super().__init__(group_name, bot_name=server_name)
         self.server = get_server(server_name)
-        self.server.running = False
 
     def setup(self) -> None:
         # 启动mcc实例
@@ -33,8 +32,6 @@ class MccBot(Bot):
         client_helper.send_msg(self.server.name, f"/me {message}")
 
     def start_listen(self) -> None:
-        self.server.running = True
-
         mcc_ws_helper.start_ws(self.server,self.on_message)
 
     def on_message(self, message: str) -> None:
@@ -51,4 +48,4 @@ class MccBot(Bot):
     
     def stop(self) -> None:
         client_helper.send_msg(self.server.name, "/quit")
-        self.server.running = False
+        self.server.connection.stop()
