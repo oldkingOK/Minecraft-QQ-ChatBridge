@@ -55,12 +55,12 @@ def handle_command(qq_group_id: str, raw_cmd: str, on_done: Callable[[str],None]
                 while not queue.empty():
                     server_name, player_list = queue.get()
                     if len(player_list) == 0:
-                        result += f"[{server_name}] 鬼服\n没有玩家在线"
+                        result += f"[{server_name}] 鬼服\n没有玩家在线\n"
                     else:
                         result += f"[{server_name}] 在线玩家：\n"
                         for player_name in player_list: result += player_name + "\n"
                     result += "\n"
-                on_done(result[:-1]) # 删掉多余的换行符
+                on_done(result[:-2]) # 删掉多余的换行符\n\n
                     
             threading.Thread(target=task).start()
 
