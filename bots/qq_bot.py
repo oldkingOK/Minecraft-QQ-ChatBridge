@@ -1,9 +1,9 @@
 from bot import Bot
-import requests
 from enums.settings import ONEBOT_HTTP
 from enums.constants import SEND_GROUP_MSG_API
 from enums.common import MessageType
 from urllib.parse import quote
+from utils.request_util import request_get
 import bots.qq.ws_helper as qq_ws_helper
 import bots.qq.ws_msg_helper as qq_ws_msg_helper
 import bots.qq.cmd_helper as qq_cmd_helper
@@ -50,7 +50,7 @@ class QQbot(Bot):
         return qq_ws_msg_helper.handle_qq_raw_msg(group_id=self.group_name, raw_msg=message)
 
     def say(self, message: str) -> None:
-        requests.get(SEND_GROUP_MSG_API.format(ONEBOT_HTTP, self.bot_name) + quote(message))
+        request_get(SEND_GROUP_MSG_API.format(ONEBOT_HTTP, self.bot_name) + quote(message))
         pass
 
     def stop(self) -> None:
