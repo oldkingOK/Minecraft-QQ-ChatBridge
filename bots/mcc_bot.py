@@ -6,6 +6,7 @@ import bots.mcc.ws_msg_helper as mcc_ws_msg_helper
 import group.group_manager as group_manager
 from bots.mcc.config_helper import get_server
 from enums.common import MessageType
+from queue import Queue
 
 inited = False
 def init():
@@ -49,3 +50,15 @@ class MccBot(Bot):
     def stop(self) -> None:
         client_helper.send_msg(self.server.name, "/quit")
         self.server.connection.stop()
+
+    def get_player_list(self, queue: Queue[tuple[str, list[str]]]) -> list[str]:
+        """
+        获取该服务器玩家列表（已排除bot本身）
+
+        参数：
+        - queue (Queue[tuple[str, list[str]]]) 列表队列，用于存储已经获取到的玩家列表
+            - tuple (server_name: str, player_list: list[str])
+        """
+        mcc_ws_helper.get_player_list(self.server, queue)
+        pass
+        

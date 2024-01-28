@@ -5,6 +5,7 @@ ws_helper
 
 from typing import Callable
 from bots.classes import Server
+from queue import Queue
 import json
 import ok_logger
 import threading
@@ -64,7 +65,42 @@ def _start(server: Server, msg_handler):
     # start_recv(server, msg_handler)
     connection.add_listener(test=TRUE, on_message=msg_handler, one_time=False)
 
-def get_player_list(server: Server):
+def get_player_list(server: Server, queue: Queue[tuple[str, list[str]]]) -> None:
+    """
+    获取该服务器玩家列表（已排除bot本身）
+
+    参数：
+    - server (bots.classes.Server)
+    - queue (Queue[tuple[str, list[str]]]) 列表队列，用于存储已经获取到的玩家列表
+        - tuple (server_name: str, player_list: list[str])
+    
+    返回值：
+    - player_list (list[str])
+    """
+
+    """
+    接收到的数据示例：
+    {"event": "OnWsCommandResponse",
+      "data": "{\"success\": true,
+        \"requestId\": \"614569\",
+        \"command\": \"GetOnlinePlayers\",
+        \"result\": [\"QQbot\"]}"
+    }
+    """
+    def on_msg(msg):
+        player_list:list[str] = json.loads(json.loads(msg)["data"])["result"]
+        player_list.remove(server.account_name)
+        queue.put((server.name, player_list))
+
+    # lambda msg: queue.put((server.name, json.loads(json.loads(msg)["data"])["result"].remove(server.account_name)))
+    player_list_request = mcc_cmd_helper.GetOnlinePlayers(
+        on_msg
+    )
+    server.connection.request(
+        player_list_request.request_json,
+        player_list_request.test,
+        player_list_request.on_response
+    )
     pass
 
 def TRUE(*args):

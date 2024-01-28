@@ -1,10 +1,11 @@
 import json
 from enums.settings import FACE_TO_LINK
 from enums.constants import FACE_QQ_API, MFACE_QQ_API, ONE_LINE_MAX_LENGTH
+from enums.common import MessageType
 from bots.qq.ws_msg_util import get_user_display_name, get_msg_sender_qq_by_id
 from lib.chatimage_util import image_url_to_cicode
 
-def handle_qq_raw_msg(group_id: str, raw_msg: str):
+def handle_qq_raw_msg(group_id: str, raw_msg: str) -> tuple[list[str] | str, MessageType]:
     """
     处理QQ发送过来的json消息
     """
@@ -93,4 +94,7 @@ def handle_qq_raw_msg(group_id: str, raw_msg: str):
 
         result[index] += sub_msg
 
-    return result
+    # 如果以#!起手，就只取第一行，并把prefix删掉
+    if result[0].startswith(f"{prefix}#!"): return result[0][len(prefix):], MessageType.CMD
+    # 否则就时聊天信息
+    return result, MessageType.CHAT

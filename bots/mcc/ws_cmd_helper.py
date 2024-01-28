@@ -1,4 +1,3 @@
-from enums.common import MccWsCmdId
 from typing import Callable
 from random import randint
 import json
