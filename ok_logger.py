@@ -39,6 +39,9 @@ def init_ok_logger() -> None:
     buffer_handler.setFormatter(OkFormatter())
 
     logger.addHandler(buffer_handler)
+    # 设为False防止重复消息
+    # https://github.com/Pithikos/python-websocket-server/issues/85
+    logger.propagate = False
 
 def get_logger() -> logging.Logger:
     global buffer_handler, logger
