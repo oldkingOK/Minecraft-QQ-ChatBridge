@@ -41,6 +41,7 @@ def add_pane(pane_name: str):
     global source_window, server_pane_dict
     
     source_window.select_layout("even-horizontal")
+    "平均分配，不然会报错：no space for new pane"
     pane = source_window.split_window()
     server_pane_dict[pane_name] = pane
 
