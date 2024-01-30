@@ -34,6 +34,7 @@ Chat across multiple Minecraft servers and QQ groups with No Server configuratio
 
 - [ ] 允许自定义开关和设定消息类型的频率
 - [ ] 实现管理员私聊发送信息操作chatbridge
+- [ ] 实现仪表盘
 
 </details>
 
