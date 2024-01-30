@@ -18,8 +18,6 @@ def handle_command(qq_group_id: str, raw_cmd: str, on_done: Callable[[str],None]
     raw_text：
     #!help
     #!list
-    #!reco
-    #!asdasoicoi
 
     参数：
     - qq_group_id (str) qq群号
@@ -34,8 +32,7 @@ def handle_command(qq_group_id: str, raw_cmd: str, on_done: Callable[[str],None]
             on_done(
                 "【命令帮助】\n"
                 "#!help 命令帮助\n"
-                "#!list 玩家列表\n"
-                "#!reco 重启"
+                "#!list 玩家列表"
             )
         
         case "list":
