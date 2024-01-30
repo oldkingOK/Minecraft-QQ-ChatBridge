@@ -63,7 +63,7 @@ def _start(server: Server, msg_handler):
 
     # 开始接收消息
     # start_recv(server, msg_handler)
-    connection.add_listener(test=TRUE, on_message=msg_handler, one_time=False)
+    connection.add_msg_listener(test=TRUE, on_message=msg_handler, one_time=False)
 
 def get_player_list(server: Server, queue: Queue[tuple[str, list[str]]]) -> None:
     """
