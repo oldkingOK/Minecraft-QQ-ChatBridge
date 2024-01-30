@@ -38,6 +38,12 @@ class MccBot(Bot):
     def on_message(self, message: str) -> None:
         result, message_type = self.handle_raw_message(message)
 
+        if message_type is MessageType.DISCONNECT:
+            # mcc会自动重连，所以这里重连websocket
+            self.server.connection.stop()
+            self.start_listen()
+            return
+
         if result is not None and message_type is not MessageType.UNKNOWN: 
             message = f"[{self.server.name}] {result}"
             ok_logger.get_logger().debug(f"服务器 {self.server.name} 收到: {result}, 消息种类：{message_type.name}")
@@ -61,4 +67,3 @@ class MccBot(Bot):
         """
         mcc_ws_helper.get_player_list(self.server, queue)
         pass
-        
