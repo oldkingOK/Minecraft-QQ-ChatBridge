@@ -1,4 +1,4 @@
-import lib.cli_helper as cli_helper
+import lib_helper.cli_helper as cli_helper
 import config_helper
 import ok_logger
 import group.group_manager as group_manager

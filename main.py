@@ -2,8 +2,8 @@
 
 import config_helper
 from enums.common import CmdType
-import lib.tmux_helper as tmux_helper
-import lib.cli_helper as cli_helper
+import lib_helper.tmux_helper as tmux_helper
+import lib_helper.cli_helper as cli_helper
 import ok_logger
 
 # for test

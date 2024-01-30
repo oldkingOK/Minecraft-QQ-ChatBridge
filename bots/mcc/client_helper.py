@@ -1,4 +1,4 @@
-import lib.tmux_helper as tmux_helper
+import lib_helper.tmux_helper as tmux_helper
 import bots.mcc.config_helper as mcc_config_helper
 from enums.settings import TMP_FOLDER, MCC_PATH, SUDO_PASSWD
 

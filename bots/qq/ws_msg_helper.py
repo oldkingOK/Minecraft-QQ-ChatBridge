@@ -3,7 +3,7 @@ from enums.settings import FACE_TO_LINK
 from enums.constants import FACE_QQ_API, MFACE_QQ_API, ONE_LINE_MAX_LENGTH
 from enums.common import MessageType
 from bots.qq.ws_msg_util import get_user_display_name, get_msg_sender_qq_by_id
-from lib.chatimage_util import image_url_to_cicode
+from lib_helper.chatimage_util import image_url_to_cicode
 
 def handle_qq_raw_msg(group_id: str, raw_msg: str) -> tuple[list[str] | str, MessageType]:
     """

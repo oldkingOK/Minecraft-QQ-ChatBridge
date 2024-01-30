@@ -5,7 +5,7 @@
 from enums.settings import ONEBOT_WS_HOST, ONEBOT_WS_PORT
 from typing import Callable
 import bots.qq.ws_msg_util as qq_ws_msg_util
-from lib.websocket_server_util import FriendlyWsServer
+from lib_helper.websocket_server_util import FriendlyWsServer
 
 ws_server: FriendlyWsServer
 "服务器对象"

@@ -10,7 +10,7 @@ import json
 import ok_logger
 import threading
 import bots.mcc.ws_cmd_helper as mcc_cmd_helper
-import lib.websocket_client_util as websocket_client_util
+import lib_helper.websocket_client_util as websocket_client_util
 
 DEATH_MESSAGE_DICT: dict[str,str] = {}
 """存放死亡消息的dict，用于翻译死亡消息"""

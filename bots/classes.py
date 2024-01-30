@@ -1,4 +1,4 @@
-from lib.websocket_client_util import ClientConnection
+from lib_helper.websocket_client_util import ClientConnection
 
 class Account():
     def __init__(self, account_dict: dict) -> None:

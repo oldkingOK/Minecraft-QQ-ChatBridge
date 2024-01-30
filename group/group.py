@@ -1,5 +1,5 @@
 from bot import Bot
-import lib.tmux_helper as tmux_helper
+import lib_helper.tmux_helper as tmux_helper
 import ok_logger
 
 class Group:
